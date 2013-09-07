@@ -97,6 +97,25 @@ app.post('/feeds', function(request, response) {
   });
 });
 
+app.post('/subscriptions', function(request, response) {
+  var user = request.session.user;
+  if (typeof user === 'undefined') {
+    return response.send({success:false});
+  }
+  Feed.fineOne({ _id: request.body.feed_name }).exec(function(error, feed) {
+    Feed.update({_id: request.body.feed._id}, {$push: {subscribers: user._id}}, function(err, num, resp) {
+      if (err) return res.send('error subscribing user to feed: ' + err);
+      console.log('Feed ' + feed.name + ' got new subscriber ' + user.name);
+      response.send({ success: true });
+    });
+    User.update({_id: user._id}, {$push: {subscriptions: feed._id}}, function(err, num, resp) {
+      if (err) return res.send('error subscribing user to feed: ' + err);
+      console.log('User ' + user.name + ' subscribed to feed ' + request.body.feed.name);
+      response.send({ success: true });
+    });
+  });
+});
+
 app.post('/tasks', function(request, response) {
   var user = request.session.user;
   if (typeof user === 'undefined') {
