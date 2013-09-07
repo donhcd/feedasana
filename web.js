@@ -142,10 +142,13 @@ app.post('/unsubscribe', function(request, response) {
   }
   Feed.findOne({ name: request.body.name }).exec(function(error, feed) {
     if (error || feed === null) return response.send({success:false});
-    var ind = feed.subscribers.indexOf(user._id);
-    if (ind < feed.subscribers.length) {
-      feed.subscribers.splice(ind, 1);
+    var userInd = feed.subscribers.indexOf(user._id);
+    var feedInd = user.subscriptions.indexOf(feed._id);
+    if (userInd < feed.subscribers.length) {
+      feed.subscribers.splice(userInd, 1);
       feed.save(null);
+      user.subscriptions.splice(feedInd, 1);
+      user.save(null);
       response.send({ success: true });
     } else {
       response.send({ success: false });
