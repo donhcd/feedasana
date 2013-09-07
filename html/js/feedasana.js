@@ -6,7 +6,7 @@ feedController = function($scope) {
 
   $scope.allSubscriptions = [
     {
-      ownerid: "123",
+      owner: false,
       name: "15-462: Graphics",
       tasks: [
         {name:"pool", due:"Oct 12, 2014"},
@@ -15,7 +15,7 @@ feedController = function($scope) {
       ]
     },
     {
-      ownerid: "456",
+      owner: false,
       name: "15-466: Photography",
       tasks: [
         {name:"p1 and friends", due:"Oct 12, 2015"},
@@ -24,7 +24,7 @@ feedController = function($scope) {
       ]
     },
     {
-      ownerid: "789",
+      owner: true,
       name: "Don's killer workout",
       tasks: [
         {name:"P90X", due:"May 12, 2015"},
@@ -32,4 +32,10 @@ feedController = function($scope) {
       ]
     }
   ];
+
+  $scope.curFeed;
+
+  $scope.setCurFeed = function(feed) {
+    $scope.curFeed = feed;
+  }
 }

@@ -48,3 +48,26 @@ body {
   font-weight: lighter;
   font-size: 14px;
 }
+
+/* Animation stuff. */
+.task-show-setup {
+  -webkit-transition:all linear 0.2s;
+  -moz-transition:all linear 0.2s;
+  -ms-transition:all linear 0.2s;
+  -o-transition:all linear 0.2s;
+  transition:all linear 0.2s;
+}
+
+.task-show-setup {
+  line-height:0;
+  opacity:0;
+  padding:0 10px;
+}
+
+.task-show-start.task-show-start {
+  line-height:20px;
+  opacity:1;
+  padding:10px;
+  background:white;
+}
+

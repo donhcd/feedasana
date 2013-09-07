@@ -10,8 +10,15 @@
   <body ng-controller="feedController">
     <div class="main-container">
       <div class="feed-block" ng-repeat="feed in allSubscriptions">
-        <div class="feed-name">{{feed.name}}</div>
+        <div class="feed-name">{{feed.name}}
+          <button ng-show="feed.owner && (!curFeed)" ng-click="setCurFeed(feed)">+</button>
+          <button ng-show="!feed.owner">-</button>
+        </div>
         <div class="feed-tasks">
+          <div class="feed-task" ng-show="curFeed==feed"
+            ng-animate="{show: 'task-show'}">
+            This is a new task.
+          </div>
           <div class="feed-task" ng-repeat="task in feed.tasks">
             <span class="feed-task-name">
               {{task.name}}
@@ -23,5 +30,5 @@
         </div>
       </div>
     </div>
-  </body>
+ </body>
 </html>
