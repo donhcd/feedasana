@@ -58,7 +58,7 @@ var User = mongoose.model('User', UserSchema),
 mongoose.connect('mongodb://localhost/feedasana');
 
 app.get('/', function(request, response) {
-  var user = request.session.user;
+  var user = request.session.user_info;
   if (typeof user !== 'undefined') {
     // mockAddToTask(request, response);
     response.send(ejs.render(fs.readFileSync(__dirname + '/views/index.html', 'utf8'), {}));
@@ -69,7 +69,7 @@ app.get('/', function(request, response) {
 });
 
 app.post('/feeds', function(request, response) {
-  var user = request.session.user;
+  var user = request.session.user_info;
   if (typeof user === 'undefined') {
     return response.send({success:false});
   }
@@ -108,14 +108,15 @@ function errF(error, response) {
 }
 
 app.post('/subscriptions', function(request, response) {
-  var user = request.session.user;
+  var user = request.session.user_info;
   if (typeof user === 'undefined') {
     return response.send({success:false});
   }
   console.log(request.body);
   console.log(request.body.name);
   Feed.findOne({ name: request.body.name }).exec(function(error, feed) {
-    if (error || feed === null) return response.send({success:false});
+    if (error || feed === null || feed.subscribers.indexOf(user._id) !== -1)
+      return response.send({success:false});
     console.log('Feed: ' + feed);
     console.log('User ' + user);
     Feed.update({_id: feed._id}, {$push: {subscribers: user._id}}, function(err, num, resp) {
@@ -135,7 +136,7 @@ app.post('/subscriptions', function(request, response) {
 
 
 app.post('/unsubscribe', function(request, response) {
-  var user = request.session.user;
+  var user = request.session.user_info;
   console.log(request.body.name);
   if (typeof user === 'undefined') {
     return response.send({success: false});
@@ -147,9 +148,12 @@ app.post('/unsubscribe', function(request, response) {
     if (userInd < feed.subscribers.length) {
       feed.subscribers.splice(userInd, 1);
       feed.save(null);
-      user.subscriptions.splice(feedInd, 1);
-      user.save(null);
-      response.send({ success: true });
+      User.findById(user._id, function(error, user) {
+        console.log("no more sub");
+        user.subscriptions.splice(feedInd, 1);
+        user.save(null);
+        response.send({ success: true });
+      });
     } else {
       response.send({ success: false });
     }
@@ -157,7 +161,7 @@ app.post('/unsubscribe', function(request, response) {
 });
 
 app.post('/tasks', function(request, response) {
-  var user = request.session.user;
+  var user = request.session.user_info;
   if (typeof user === 'undefined') {
     return response.send({success:false});
   }
@@ -193,7 +197,7 @@ app.post('/tasks', function(request, response) {
 });
 
 app.get('/feeds', function(request, response) {
-  var user = request.session.user;
+  var user = request.session.user_info;
   if (typeof user === 'undefined') {
     return response.send({success:false});
   }
@@ -212,9 +216,9 @@ app.get('/feeds', function(request, response) {
 function mockAddToTask(request, response) {
   Feed.create({
     name: 'datffeddnam',
-    owner: request.session.user._id,
+    owner: request.session.user_info._id,
     tasks: [],
-    subscribers: request.session.user._id
+    subscribers: request.session.user_info._id
   }, function(err, feed) {
     if (err) return response.send('fuck everything');
     var task = new Task({
@@ -330,7 +334,7 @@ app.get('/callback', function(request, response) {
               error: error
             });
           } else {
-            request.session.user = saved_user;
+            request.session.user_info = saved_user;
             console.log("Saving user: " + saved_user);
             response.redirect('/');
           }
