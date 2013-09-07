@@ -13,24 +13,27 @@
   </head>
   <body ng-controller="feedController">
     <div class="main-container">
-      <div class="feed-block">
-        <button class="new-feed"
-            ng-click="newFeed(); state=feedStates.NEW"
-            ng-show="!curFeed">
-          New Feed
-        </button>
-        <button class="new-feed"
-            ng-click="newFeed(); state=feedStates.SUBSCRIBE"
-            ng-show="!curFeed">
-          Subscribe
-        </button>
+      <div class="feed-block no-border">
+        <div class="buttons">
+          <button class="new-feed"
+              ng-click="newFeed(); state=feedStates.NEW"
+              ng-show="!curFeed">
+            Create new feed
+          </button>
+          <button class="new-feed"
+              ng-click="newFeed(); state=feedStates.SUBSCRIBE"
+              ng-show="!curFeed">
+            Subscribe to new feed
+          </button>
+        </div>
         <!--Start: form for adding new feed.-->
         <div ng-show="curFeed"
-            ng-animate="{show: 'task-show', hide:'task-hide'}"
             style="display:none">
-          <input type="text" placeholder="Name of feed" ng-model="curFeed.name">
-          <button ng-click="saveOrSubscribeFeed(state)">Save</button>
-          <button ng-click="curFeed=undefined">Cancel</button>
+          <input class="edit-input" type="text" placeholder="Name of feed" ng-model="curFeed.name">
+          <div class="buttons">
+            <button class="edit" ng-click="saveOrSubscribeFeed(state)">{{state}}</button>
+            <button class="cancel" ng-click="curFeed=undefined">Cancel</button>
+          </div>
         </div>
         <!--End: form for adding new feed.-->
       </div>

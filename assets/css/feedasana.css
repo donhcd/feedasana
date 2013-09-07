@@ -9,7 +9,6 @@ body {
 button {
   background: #1f8dd6;
   filter: none;
-  text-shadow: 0 -1px 0 #003366;
   color: #ffffff;
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;

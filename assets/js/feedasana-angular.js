@@ -39,7 +39,7 @@ feedController = function($scope) {
   $scope.newFeed = function() {
     $scope.curFeed = {name: ""};
   };
-  $scope.feedStates = {NEW: 0, SUBSCRIBE: 1}
+  $scope.feedStates = {NEW: "Create", SUBSCRIBE: "Subscribe"}
   $scope.saveOrSubscribeFeed = function(state) {
     switch(state) {
       case ($scope.feedStates.NEW):
