@@ -8,7 +8,8 @@
   },
   "dependencies": {
     "express": "~3.3.4",
-    "asana_api": "git://github.com/rushis/asana-api"
+    "simple-oauth2": "git://github.com/donhcd/simple-oauth2",
+    "asana_api": "git://github.com/donhcd/asana-api"
   },
   "engines": {
     "node": "0.10.13",
