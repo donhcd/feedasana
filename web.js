@@ -6,7 +6,7 @@ var express = require('express'),
 
     app = express(),
     mongoose = require('mongoose'),
-    port = process.env.PORT || 8080,
+    port = process.env.PORT || 8089,
     hostname = process.env.HOSTNAME + ':' + port,
     callback_uri = hostname + '/callback',
     OAuth2 = require('simple-oauth2')({
