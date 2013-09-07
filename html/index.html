@@ -8,6 +8,18 @@
     <link rel="stylesheet" href="css/feedasana.css">
   </head>
   <body ng-controller="feedController">
-    {{name}}
+    <div ng-repeat="feed in allSubscriptions">
+      <div>{{feed.name}}</div>
+      <ul>
+        <li ng-repeat="task in feed.tasks">
+          <div>
+            {{task.name}}
+          </div> 
+          <div>
+            {{task.due}}
+          </div> 
+        </li>
+      </ul>
+    </div>
   </body>
 </html>
