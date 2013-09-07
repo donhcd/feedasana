@@ -39,15 +39,32 @@ feedController = function($scope) {
   $scope.newFeed = function() {
     $scope.curFeed = {name: ""};
   };
-  $scope.saveFeed = function() {
-    $.ajax('/feeds', {
-      type: 'post',
-      data: {
-        name: $scope.curFeed.name
-      }
-    }).done(function(saved_feed, success) {
-      console.log(saved_feed);
-    });
+  $scope.feedStates = {NEW: 0, SUBSCRIBE: 1}
+  $scope.saveOrSubscribeFeed = function(state) {
+    switch(state) {
+      case ($scope.feedStates.NEW):
+        $.ajax('/feeds', {
+          type: 'post',
+          data: {
+            name: $scope.curFeed.name
+          }
+        }).done(function(saved_feed, success) {
+          console.log("saved: " + saved_feed);
+        });
+        break;
+      case ($scope.feedStates.SUBSCRIBE):
+        $.ajax('/subscriptions', {
+          type: 'post',
+          data: {
+            name: $scope.curFeed.name
+          }
+        }).done(function(saved_feed, success) {
+          console.log("subscribed: " + saved_feed);
+        });
+        break;
+      default:
+        break;
+    }
   }
 
   // New task functionality.
