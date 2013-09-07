@@ -146,6 +146,9 @@ app.post('/unsubscribe', function(request, response) {
     if (ind < feed.subscribers.length) {
       feed.subscribers.splice(ind, 1);
       feed.save(null);
+      response.send({ success: true });
+    } else {
+      response.send({ success: false });
     }
   });
 });
