@@ -38,7 +38,7 @@ UserSchema = new Schema({
 FeedSchema = Schema({
   name: String, // name of feed
   owner: { type: ObjectId, ref: 'UserSchema' }, // owner for feed
-  tasks: { type: ObjectId, ref: 'TaskSchema' },
+  tasks: [{ type: ObjectId, ref: 'TaskSchema' }],
   subscribers: [{ type: ObjectId, ref: 'UserSchema' }]
 });
 TaskSchema = Schema({
@@ -54,7 +54,7 @@ var User = mongoose.model('User', UserSchema),
     db = mongoose.connection;
 
 /* Connect to database */
-mongoose.connect('mongodb://localhost/test');
+mongoose.connect('mongodb://localhost/feedasana');
 
 app.get('/', function(request, response) {
   var user = request.session.user;
@@ -71,11 +71,11 @@ app.post('/feeds', function(request, response) {
   if (typeof user === 'undefined') {
     return response.send({success:false});
   }
-
   var feed = new Feed({
     name: request.body.name,
     owner: user.id,
-    tasks : []
+    tasks : [],
+    subscribers : []
   });
   feed.save(function withSavedFeed(error, saved_feed) {
     if (error) {
@@ -84,7 +84,8 @@ app.post('/feeds', function(request, response) {
         error: error
       });
     } else {
-      user.update({$push: {feeds: saved_feed.id}}, function(error, num_affected, raw_response) {
+      console.log(user);
+      User.update({_id: user._id}, {$push: {feeds: saved_feed.id}}, function(err, num_affected, raw_response) {
         if (err) return res.send('error adding feed to user ' + err);
         console.log('added feed to user');
         response.send({
@@ -119,7 +120,7 @@ app.post('/tasks', function(request, response) {
     task.save(function(error, saved_task) {
       if (error) return response.send({ success: false, error: 'can\'t save task: ' + error });
 
-      feed.update({$push: {tasks: saved_task.id}}, function(error, num_affected, raw_response) {
+      Feed.update({_id: feed._id}, {$push: {tasks: saved_task.id}}, function(error, num_affected, raw_response) {
         if (err) return res.send('error adding feed to user ' + err);
         console.log('added feed to user');
         response.send({
@@ -130,6 +131,13 @@ app.post('/tasks', function(request, response) {
     });
   });
   asana.setResourceOwner(user.access_token);
+});
+
+app.get('/feeds', function(request, response) {
+  var user = request.session.user;
+  if (typeof user === 'undefined') {
+    return response.send({success:false});
+  }
 });
 
 app.get('/callback', function(request, response) {
@@ -145,20 +153,13 @@ app.get('/callback', function(request, response) {
       response.send('bad problem yo');
     } else {
       var access_token = OAuth2.AccessToken.create(token_result);
-      console.log('token is', access_token);
       asana.setResourceOwner(access_token);
       asana.getUserMe(null, function(error, me) {
         if (error) {
           console.log(error);
           response.send('yo whattup homy we gots problem '+error);
         } else {
-          var user = new User({
-            name: me.data.name,
-            access_token: access_token,
-            feeds: [],
-            subscriptions: []
-          });
-          user.save(withSavedUser);
+          User.findOne({name: me.data.name}, saveNewUser);
         }
 
         function withSavedUser(error, saved_user) {
@@ -169,7 +170,25 @@ app.get('/callback', function(request, response) {
             });
           } else {
             request.session.user = saved_user;
+            console.log("Saving user: " + saved_user);
             response.redirect('/');
+          }
+        }
+
+        function saveNewUser(error, user) {
+          if (error) {
+            response.send({success: false, error: error})
+          } else if (user === null) {
+            var user = new User({
+              name: me.data.name,
+              access_token: access_token,
+              feeds: [],
+              subscriptions: []
+            });
+            console.log("User: " + user);
+            user.save(withSavedUser);
+          } else {
+            withSavedUser(null, user);
           }
         }
       });
