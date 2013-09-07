@@ -1,0 +1,38 @@
+<!doctype html>
+<html ng-app>
+  <head>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+    <script src="js/angular.min.js"></script>
+    <script src="js/feedasana.js"></script>
+    <link rel="stylesheet" href="css/feedasana.css">
+  </head>
+  <body ng-controller="feedController">
+    <div class="main-container">
+      <div class="feed-block" ng-repeat="feed in allSubscriptions">
+        <div class="feed-name">{{feed.name}}
+          <button ng-show="feed.owner && (!curFeed)"
+            ng-click="setCurFeed(feed);taskName='';taskDueDate=''">+</button>
+          <button ng-show="!feed.owner">-</button>
+        </div>
+        <div class="feed-tasks">
+          <div class="feed-task" ng-show="curFeed==feed"
+            ng-animate="{show: 'task-show'}">
+            <input type="text" placeholder="Name of task" ng-model="taskName">
+            <input type="text" placeholder="Due date of task" ng-model="taskDueDate">
+            <button ng-click="saveTask(taskName, taskDueDate)">Save</button>
+            <button ng-click="setCurFeed()">Cancel</button>
+          </div>
+          <div class="feed-task" ng-repeat="task in feed.tasks">
+            <span class="feed-task-name">
+              {{task.name}}
+            </span> 
+            <span class="feed-task-due">
+              {{task.due}}
+            </span> 
+          </div>
+        </div>
+      </div>
+    </div>
+ </body>
+</html>
