@@ -17,7 +17,7 @@
 }
 
 .feed-name {
-  font-weight: lighter;
+  font-family: "sspl";
   font-size: 27px;
 }
 
@@ -33,7 +33,7 @@
 
 .feed-task-due {
   float: right;
-  font-weight: lighter;
+  font-family: "sspl";
   font-size: 14px;
 }
 

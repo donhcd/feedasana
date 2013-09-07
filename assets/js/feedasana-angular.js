@@ -123,14 +123,12 @@ feedController = function($scope) {
       data: {
         feed_id: $scope.selectedFeed._id, // <-- get this somehow
         name: $scope.curTask.name,
-        due_date: curTask.dueDate,
+        due_date: $scope.curTask.dueDate,
       }
     }).done(function(saved_feed, success) {
       console.log(saved_feed);
       retrieveAll();
     });
-    window.console.log(name);
-    window.console.log(duedate);
   };
 
 };

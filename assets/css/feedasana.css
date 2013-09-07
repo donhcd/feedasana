@@ -1,6 +1,9 @@
+@font-face { font-family: ssp; src: url('SourceSansPro-Regular.otf'); } 
+@font-face { font-family: sspl; font-weight: lighter; src: url('SourceSansPro-Light.otf');}
+
 /* This is the main style sheet. */
 body {
-  font-family: "Source Sans Pro";
+  font-family: "ssp";
   font-size: 17px;
   color: #333333;
   background-color: #dde4ea;
@@ -26,7 +29,7 @@ button:hover {
 input {
   height: 20px;
   padding: 5px;
-  font-family: "Source Sans Pro";
+  font-family: "ssp";
   font-size: 16px;
 }
 
