@@ -31,11 +31,24 @@ feedController = function($scope) {
     }
   ];
 
+  // New task functionality.
   $scope.curFeed;
-
-  $scope.setCurFeed = function(feed) {
+  $scope.curTask;
+  $scope.newTask= function(feed) {
     $scope.curFeed = feed;
+    $scope.curTask = {name:"", dueDate: ""};
   };
+
+  $scope.addDropboxAttachment = function() {
+    var dboptions = {
+        success: function(files) {
+                   $scope.curTask.attachments = files;
+                   $scope.$apply();
+        },
+        multiselect: true
+      }
+    Dropbox.choose(dboptions);
+  }
 
   $scope.saveTask = function(name, duedate) {
     $.ajax('/tasks', {
@@ -51,4 +64,5 @@ feedController = function($scope) {
     window.console.log(name);
     window.console.log(duedate);
   };
+
 };

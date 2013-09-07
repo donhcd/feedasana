@@ -4,7 +4,9 @@
     <script src="js/jquery.min.js"></script>
     <script src="js/jquery-ui.min.js"></script>
     <script src="js/angular.min.js"></script>
-    <script src="js/feedasana.js"></script>
+    <script src="js/feedasana-jquery.js"></script>
+    <script src="js/feedasana-angular.js"></script>
+    <script src="https://www.dropbox.com/static/api/1/dropins.js" id="dropboxjs" data-app-key="ax7alweaqjr3ynz"></script>
     <link rel="stylesheet" href="css/feedasana.css">
   </head>
   <body ng-controller="feedController">
@@ -12,16 +14,20 @@
       <div class="feed-block" ng-repeat="feed in allSubscriptions">
         <div class="feed-name">{{feed.name}}
           <button ng-show="feed.owner && (!curFeed)"
-            ng-click="setCurFeed(feed);taskName='';taskDueDate=''">+</button>
+            ng-click="newTask(feed)">+</button>
           <button ng-show="!feed.owner">-</button>
         </div>
         <div class="feed-tasks">
           <div class="feed-task" style="display:none;" ng-show="curFeed==feed"
             ng-animate="{show: 'task-show', hide:'task-hide'}">
-            <input type="text" placeholder="Name of task" ng-model="taskName">
-            <input type="date" ng-model="taskDueDate">
-            <button ng-click="saveTask(taskName, taskDueDate)">Save</button>
+            <input type="text" placeholder="Name of task" ng-model="curTask.name">
+            <input type="date" ng-model="curTask.dueDate">
+            <button type="dropbox-chooser" ng-click="addDropboxAttachment()"/>Attachment</button>
+            <button ng-click="saveTask()">Save</button>
             <button ng-click="setCurFeed()">Cancel</button>
+            <div ng-repeat="attachment in curTask.attachments">
+              {{attachment.link}}
+            </div>
           </div>
           <div class="feed-task" ng-repeat="task in feed.tasks">
             <span class="feed-task-name">
