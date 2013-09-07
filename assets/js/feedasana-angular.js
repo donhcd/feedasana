@@ -117,12 +117,12 @@ feedController = function($scope) {
     Dropbox.choose(dboptions);
   }
 
-  $scope.saveTask = function(name, duedate) {
+  $scope.saveTask = function() {
     $.ajax('/tasks', {
       type: 'post',
       data: {
-        feed_id: "FEED_ID????", // <-- get this somehow
-        name: curTask.name,
+        feed_id: $scope.selectedFeed._id, // <-- get this somehow
+        name: $scope.curTask.name,
         due_date: curTask.dueDate,
       }
     }).done(function(saved_feed, success) {
