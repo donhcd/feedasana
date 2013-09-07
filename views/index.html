@@ -8,17 +8,21 @@
     <script src="js/feedasana-angular.js"></script>
     <script src="https://www.dropbox.com/static/api/1/dropins.js" id="dropboxjs" data-app-key="ax7alweaqjr3ynz"></script>
     <link rel="stylesheet" href="css/feedasana.css">
+    <link rel="stylesheet" href="css/feeds.css">
   </head>
   <body ng-controller="feedController">
     <div class="main-container">
       <div class="feed-block">
-        <button class="new-feed" ng-click="newFeed()">New Feed</button>
+        <button class="new-feed" ng-click="newFeed()" ng-show="!curFeed">New Feed</button>
+        <!--Start: form for adding new feed.-->
         <div ng-show="curFeed"
-          ng-animate="{show: 'task-show', hide:'task-hide'}"
-          style="display:none">
+            ng-animate="{show: 'task-show', hide:'task-hide'}"
+            style="display:none">
           <input type="text" placeholder="Name of feed" ng-model="curFeed.name">
           <button ng-click="saveFeed()">Save</button>
+          <button ng-click="curFeed=undefined">Cancel</button>
         </div>
+        <!--End: form for adding new feed.-->
       </div>
       <div class="feed-block" ng-repeat="feed in allSubscriptions">
         <div class="feed-name">{{feed.name}}
@@ -27,17 +31,31 @@
           <button ng-show="!feed.owner">-</button>
         </div>
         <div class="feed-tasks">
-          <div class="feed-task" style="display:none" ng-show="selectedFeed==feed"
+          <!--Start: form for adding new task.-->
+          <div class="feed-task new-task" style="display:none" ng-show="selectedFeed==feed"
             ng-animate="{show: 'task-show', hide:'task-hide'}">
-            <input type="text" placeholder="Name of task" ng-model="curTask.name">
-            <input type="date" ng-model="curTask.dueDate">
-            <button type="dropbox-chooser" ng-click="addDropboxAttachment()"/>Attachment</button>
-            <button ng-click="saveTask()">Save</button>
-            <button ng-click="newTask()">Cancel</button>
-            <div ng-repeat="attachment in curTask.attachments">
-              {{attachment.link}}
+            <div class="input-section">
+              <div class="label-new-task">New Task</div>
+              <input class="name" type="text"
+                  placeholder="e.g. 8 hours of P90X"
+                  ng-model="curTask.name" maxlength="50">
+              <div class="date">
+                <span class="label-until">Until: </span>
+                <input class="datepicker" placeholder="09/04/2013" type="text" ng-model="curTask.dueDate">
+              </div>
+            </div>
+            <div class="attachment-section">
+              <a type="dropbox-chooser" ng-click="addDropboxAttachment()"/>Select attachment</a>
+              <div class="dropbox-links" ng-repeat="attachment in curTask.attachments">
+                {{attachment.link}}
+              </div>
+            </div>
+            <div class="button-section">
+              <button ng-click="saveTask()">Save</button>
+              <button ng-click="newTask()">Cancel</button>
             </div>
           </div>
+          <!--End: form for adding new task.-->
           <div class="feed-task" ng-repeat="task in feed.tasks">
             <span class="feed-task-name">
               {{task.name}}

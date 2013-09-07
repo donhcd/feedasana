@@ -6,80 +6,28 @@ body {
   background-color: #dde4ea;
 }
 
-.feed-block {
-  border: 1px solid #9cacbc;
-  width: 500px;
-  margin: 40px auto;
-  background: #ffffff;
-  -webkit-border-radius: 5px;
-  -moz-border-radius: 5px;
-  -ms-border-radius: 5px;
-  -o-border-radius: 5px;
-  -webkit-box-shadow: 0px 2px 4px rgba(0,0,0,0.2);
-  box-shadow: 0px 2px 4px rgba(0,0,0,0.2);
+button {
+  background: #1f8dd6;
+  filter: none;
+  text-shadow: 0 -1px 0 #003366;
+  color: #ffffff;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -ms-border-radius: 3px;
+  -o-border-radius: 3px;
+  border: 1px solid #114d97;
+  width: 50px;
+  height: 25px;
 }
 
-.feed-name, .feed-task {
-  padding: 10px;
+button:hover {
+  background: #1669a7;
 }
 
-.feed-name {
-  font-weight: lighter;
-  font-size: 27px;
+input {
+  height: 20px;
+  padding: 5px;
+  font-family: "Source Sans Pro";
+  font-size: 16px;
 }
 
-.feed-tasks {
-  color: #1f8dd6;
-
-}
-
-.feed-task {
-  border-top: 1px solid #e5e5e5;
-
-}
-
-.feed-task-name {
-
-
-}
-
-.feed-task-due {
-  float: right;
-  font-weight: lighter;
-  font-size: 14px;
-}
-
-.task-show-setup, .task-hide-setup {
-  -webkit-transition:all linear 0.2s;
-  -moz-transition:all linear 0.2s;
-  -ms-transition:all linear 0.2s;
-  -o-transition:all linear 0.2s;
-  transition:all linear 0.2s;
-}
-
-.task-show-setup {
-  line-height:0;
-  opacity:0;
-  padding:0 10px;
-}
-
-.task-show-start.task-show-start {
-  line-height:20px;
-  opacity:1;
-  padding:10px;
-  background:white;
-}
-
-.task-hide-setup {
-  line-height:20px;
-  opacity:1;
-  padding:10px;
-  border:1px solid black;
-  background:white;
-}
-
-.task-hide-start.task-hide-start {
-  line-height:0;
-  opacity:0;
-  padding:0 10px;
-}
