@@ -10,7 +10,9 @@
     "express": "~3.3.4",
     "simple-oauth2": "git://github.com/donhcd/simple-oauth2",
     "asana_api": "git://github.com/donhcd/asana-api",
-    "ejs": "~0.8.4"
+    "ejs": "~0.8.4",
+    "mongodb": "*",
+    "mongoose": "*"
   },
   "engines": {
     "node": "0.10.13",

@@ -5,8 +5,9 @@ var express = require('express'),
     fs = require('fs'),
 
     app = express(),
+    mongoose = require('mongoose'),
     port = process.env.PORT || 8080,
-    hostname = 'http://localhost:' + port,
+    hostname = process.env.HOSTNAME + ':' + port,
     callback_uri = hostname + '/callback',
     OAuth2 = require('simple-oauth2')({
       clientID: process.env.ASANA_CLIENT_ID,
@@ -25,6 +26,18 @@ app.use(express.cookieParser());
 app.use(express.session({secret: process.env.BEST_SECRET_EVER}));
 app.use(express.static(__dirname + '/assets'));
 
+/** Define feed model for database */
+feedSchema = mongoose.Schema({
+  name: String, // name of feed
+  owner: String, // owner for feed
+  tasks: [{shortDesc : String, fullDesc : String, date : Date}] // pending tasks
+});
+var Feed = mongoose.model('Feed', feedSchema);
+
+/* Connect to database */
+mongoose.connect('mongodb://localhost/test');
+var db = mongoose.connection;
+
 app.get('/', function(request, response) {
   var access_token = request.session.access_token;
   if (typeof access_token !== 'undefined') {
@@ -41,6 +54,30 @@ app.get('/', function(request, response) {
   } else {
     // give middle page thingy
     response.redirect(authorization_uri);
+  }
+});
+
+app.post('/addfeed', function(request, response) {
+  var access_token = request.session.access_token;
+
+  function addFeed(feedName, owner) {
+    db.once('open', function() {
+      var feed = new Feed({name : feedName, owner : owner, tasks : []});
+      feed.save()
+    })
+  }
+
+  if (typeof access_token === 'undefined') {
+    response.redirect(authorization_uri);
+  } else {
+    asana.getResourceOwner(access_token);
+    asana.getUserMe(null, function(error, me) {
+      if (error) {
+        response.send("FUCK");
+      } else {
+        addFeed(request.query.feedName, me.data.name);
+      }
+    });
   }
 });
 
@@ -67,3 +104,4 @@ app.get('/callback', function(request, response) {
 app.listen(port, function() {
     console.log("Listening on " + port);
 });
+
