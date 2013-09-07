@@ -31,11 +31,37 @@ feedController = function($scope) {
     }
   ];
 
-  // New task functionality.
+  // New feed functionality.
+  /**
+   * The new feed that is currently edited.
+   */
   $scope.curFeed;
+  $scope.newFeed = function() {
+    $scope.curFeed = {name: ""};
+  };
+  $scope.saveFeed = function() {
+    $.ajax('/feeds', {
+      type: 'post',
+      data: {
+        name: $scope.curFeed.name
+      }
+    }).done(function(saved_feed, success) {
+      console.log(saved_feed);
+    });
+  }
+
+  // New task functionality.
+  /**
+   * The selected feed.
+   */
+  $scope.selectedFeed;
+
+  /**
+   * The new task that is currently edited.
+   */
   $scope.curTask;
   $scope.newTask= function(feed) {
-    $scope.curFeed = feed;
+    $scope.selectedFeed = feed;
     $scope.curTask = {name:"", dueDate: "", attachments: undefined};
   };
 
@@ -55,8 +81,8 @@ feedController = function($scope) {
       type: 'post',
       data: {
         feed_id: "FEED_ID????", // <-- get this somehow
-        name: name,
-        due_date: duedate
+        name: curTask.name,
+        due_date: curTask.dueDate,
       }
     }).done(function(saved_feed, success) {
       console.log(saved_feed);
