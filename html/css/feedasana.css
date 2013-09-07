@@ -45,4 +45,6 @@ body {
 
 .feed-task-due {
   float: right;
+  font-weight: lighter;
+  font-size: 14px;
 }
