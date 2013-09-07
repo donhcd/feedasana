@@ -98,22 +98,50 @@ app.post('/feeds', function(request, response) {
   });
 });
 
+function errF(error, response) {
+  return response.send({success: false, error: error});
+}
+
 app.post('/subscriptions', function(request, response) {
   var user = request.session.user;
   if (typeof user === 'undefined') {
     return response.send({success:false});
   }
-  Feed.fineOne({ _id: request.body.feed_name }).exec(function(error, feed) {
-    Feed.update({_id: request.body.feed._id}, {$push: {subscribers: user._id}}, function(err, num, resp) {
-      if (err) return res.send('error subscribing user to feed: ' + err);
+  console.log(request.body);
+  console.log(request.body.name);
+  Feed.findOne({ name: request.body.name }).exec(function(error, feed) {
+    if (error || feed === null) return response.send({success:false});
+    console.log('Feed: ' + feed);
+    console.log('User ' + user);
+    Feed.update({_id: feed._id}, {$push: {subscribers: user._id}}, function(err, num, resp) {
+      if (err) return response.send('error subscribing user to feed: ' + err);
       console.log('Feed ' + feed.name + ' got new subscriber ' + user.name);
-      response.send({ success: true });
     });
     User.update({_id: user._id}, {$push: {subscriptions: feed._id}}, function(err, num, resp) {
-      if (err) return res.send('error subscribing user to feed: ' + err);
-      console.log('User ' + user.name + ' subscribed to feed ' + request.body.feed.name);
+      if (err) return response.send('error subscribing user to feed: ' + err);
+      console.log('User ' + user.name + ' subscribed to feed ' + request.body.name);
       response.send({ success: true });
     });
+    for (var task in Task.find({ feed: feed._id, due_date: { $lt: new Date().getDate() } })) {
+      User.update();
+    }
+  });
+});
+
+
+app.post('/unsubscribe', function(request, response) {
+  var user = request.session.user;
+  console.log(request.body.name);
+  if (typeof user === 'undefined') {
+    return response.send({success: false});
+  }
+  Feed.findOne({ name: request.body.name }).exec(function(error, feed) {
+    if (error || feed === null) return response.send({success:false});
+    var ind = feed.subscribers.indexOf(user._id);
+    if (ind < feed.subscribers.length) {
+      feed.subscribers.splice(ind, 1);
+      feed.save(null);
+    }
   });
 });
 
