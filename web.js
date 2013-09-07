@@ -24,6 +24,7 @@ var express = require('express'),
 app.use(express.logger());
 app.use(express.cookieParser());
 app.use(express.session({secret: process.env.BEST_SECRET_EVER}));
+app.use(express.bodyParser());
 app.use(express.static(__dirname + '/assets'));
 
 /** Define feed model for database */
@@ -57,27 +58,42 @@ app.get('/', function(request, response) {
   }
 });
 
-app.post('/addfeed', function(request, response) {
+app.post('/feeds', function(request, response) {
   var access_token = request.session.access_token;
+  if (typeof access_token === 'undefined') {
+    return response.send({success:false});
+  }
+  asana.setResourceOwner(access_token);
+  asana.getUserMe(null, withMe);
 
-  function addFeed(feedName, owner) {
-    db.once('open', function() {
-      var feed = new Feed({name : feedName, owner : owner, tasks : []});
-      feed.save()
-    })
+  function withMe(error, me) {
+    if (error) {
+      response.send({
+        success: false,
+        error: error // "error getting me from asana"
+      });
+    } else {
+      var feed = new Feed({
+        name: request.body.name,
+        owner: request.body.owner,
+        tasks : []
+      });
+      feed.save(withSavedFeed);
+    }
   }
 
-  if (typeof access_token === 'undefined') {
-    response.redirect(authorization_uri);
-  } else {
-    asana.getResourceOwner(access_token);
-    asana.getUserMe(null, function(error, me) {
-      if (error) {
-        response.send("FUCK");
-      } else {
-        addFeed(request.query.feedName, me.data.name);
-      }
-    });
+  function withSavedFeed(error, saved_feed) {
+    if (error) {
+      response.send({
+        success: false,
+        error: error
+      });
+    } else {
+      response.send({
+        success: true,
+        feed: saved_feed
+      });
+    }
   }
 });
 

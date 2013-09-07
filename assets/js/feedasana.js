@@ -35,10 +35,20 @@ feedController = function($scope) {
 
   $scope.setCurFeed = function(feed) {
     $scope.curFeed = feed;
-  }
+  };
 
   $scope.saveTask = function(name, duedate) {
+    $.ajax('/tasks', {
+      type: 'post',
+      data: {
+        feed_id: "FEED_ID????", // <-- get this somehow
+        name: name,
+        due_date: duedate
+      }
+    }).done(function(saved_feed, success) {
+      console.log(saved_feed);
+    });
     window.console.log(name);
     window.console.log(duedate);
-  }
-}
+  };
+};
