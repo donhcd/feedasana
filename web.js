@@ -32,6 +32,7 @@ var Schema = mongoose.Schema,
 UserSchema = new Schema({
   name: String,
   access_token: Object,
+  workspace: Object,
   feeds: [{ type: ObjectId, ref: 'Feed' }],
   subscriptions: [{ type: ObjectId, ref: 'Feed' }]
 });
@@ -50,8 +51,7 @@ TaskSchema = Schema({
 
 var User = mongoose.model('User', UserSchema),
     Feed = mongoose.model('Feed', FeedSchema),
-    Task = mongoose.model('Task', TaskSchema),
-    db = mongoose.connection;
+    Task = mongoose.model('Task', TaskSchema);
 
 /* Connect to database */
 mongoose.connect('mongodb://localhost/feedasana');
@@ -59,7 +59,8 @@ mongoose.connect('mongodb://localhost/feedasana');
 app.get('/', function(request, response) {
   var user = request.session.user;
   if (typeof user !== 'undefined') {
-    response.send(ejs.render(fs.readFileSync(__dirname + '/views/index.html', 'utf8'), {penis:'hi'}));
+    // mockAddToTask(request, response);
+    response.send(ejs.render(fs.readFileSync(__dirname + '/views/index.html', 'utf8'), {}));
   } else {
     // TODO: give middle page thingy
     response.redirect(authorization_uri);
@@ -169,6 +170,71 @@ app.get('/feeds', function(request, response) {
   });
 });
 
+function mockAddToTask(request, response) {
+  Feed.create({
+    name: 'datffeddnam',
+    owner: request.session.user._id,
+    tasks: [],
+    subscribers: request.session.user._id
+  }, function(err, feed) {
+    if (err) return response.send('fuck everything');
+    var task = new Task({
+          name: 'taskname!!',
+          notes: 'this is totally a real task',
+          due_date: new Date(),
+          feed: feed._id
+        });
+    task.save(function(error, saved_task) {
+      if (error) return response.send({ success: false, error: 'can\'t save task: ' + error });
+
+      Feed.update({id: feed._id}, {$push: {tasks: saved_task.id}}, function(error, num_affected, update_response) {
+        if (error) return res.send('error adding update response to user ' + error);
+        console.log('update response '+feed._id);
+        addTaskToFeedSubscribers(saved_task, feed, response);
+      });
+    });
+  });
+}
+
+function addTaskToFeedSubscribers(task_info, feed, response) {
+  Feed.findById(feed._id).populate('subscribers').exec(function(err, feed) {
+    if (err || feed === null) {
+      response.send('can\'t find feed error: ' + err);
+    }
+    console.log('in findOne, feed is: ');
+    console.log(feed);
+    console.log('in findOne, subscribers are: ');
+    console.log(feed.subscribers);
+    var errors = [];
+    feed.subscribers.forEach(function(subscriber) {
+      console.log('subscribing a subscriber ' + subscriber.name);
+      var task = {
+        name: task_info.name,
+        notes: task_info.notes,
+        assignee: 'me',
+        workspace: subscriber.workspace.id,
+        due_on: task_info.due_date
+      };
+      asana.setResourceOwner(subscriber.access_token);
+      asana.createTask(task, function(err, data) {
+        if (err) errors.push([subscriber.name, err]);
+        else {
+          console.log('subscriber subscribed:');
+          console.log(data);
+        }
+      });
+    });
+    if (errors.length > 0) {
+      response.send('errors occurred: ' + errors);
+    } else {
+      response.send({
+        success: true,
+        task: task_info
+      });
+    }
+  });
+}
+
 app.get('/callback', function(request, response) {
   var code = request.query.code;
   OAuth2.AuthCode.getToken({
@@ -188,7 +254,7 @@ app.get('/callback', function(request, response) {
           console.log(error);
           response.send('yo whattup homy we gots problem '+error);
         } else {
-          User.findOne({name: me.data.name}, saveNewUser);
+          User.findOne({'access_token.token.data.id': me.data.id}, saveNewUser);
         }
 
         function withSavedUser(error, saved_user) {
@@ -204,20 +270,26 @@ app.get('/callback', function(request, response) {
           }
         }
 
-        function saveNewUser(error, user) {
+        function saveNewUser(error, user_info) {
           if (error) {
-            response.send({success: false, error: error})
-          } else if (user === null) {
+            response.send({success: false, error: error});
+          } else if (user_info === null) {
+            console.log("me: ");
+            console.log(me);
+            console.log('me.data.workspaces[0]');
+            console.log(me.data.workspaces[0]);
             var user = new User({
               name: me.data.name,
               access_token: access_token,
+              workspace: me.data.workspaces[0],
               feeds: [],
               subscriptions: []
             });
             console.log("User: " + user);
             user.save(withSavedUser);
           } else {
-            withSavedUser(null, user);
+            console.log('User already exists');
+            withSavedUser(null, user_info);
           }
         }
       });
