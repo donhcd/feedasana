@@ -30,8 +30,6 @@ feedController = function($scope) {
         {name:"P90X", due:"May 12, 2015"},
         {name:"50 push ups", due:"Dec 30, 2100"}
       ]
- 
-
     }
   ];
 }
