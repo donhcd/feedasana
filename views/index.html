@@ -24,7 +24,7 @@
             <input type="date" ng-model="curTask.dueDate">
             <button type="dropbox-chooser" ng-click="addDropboxAttachment()"/>Attachment</button>
             <button ng-click="saveTask()">Save</button>
-            <button ng-click="setCurFeed()">Cancel</button>
+            <button ng-click="newTask()">Cancel</button>
             <div ng-repeat="attachment in curTask.attachments">
               {{attachment.link}}
             </div>

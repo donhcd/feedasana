@@ -36,7 +36,7 @@ feedController = function($scope) {
   $scope.curTask;
   $scope.newTask= function(feed) {
     $scope.curFeed = feed;
-    $scope.curTask = {name:"", dueDate: ""};
+    $scope.curTask = {name:"", dueDate: "", attachments: undefined};
   };
 
   $scope.addDropboxAttachment = function() {
