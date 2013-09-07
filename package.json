@@ -1,0 +1,26 @@
+{
+  "name": "feedasana",
+  "version": "0.0.1",
+  "description": "asana task feeds",
+  "main": "web.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "~3.3.4"
+  },
+  "engines": {
+    "node": "0.10.13",
+    "npm": "1.3.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/donhcd/feedasana"
+  },
+  "keywords": [
+    "node",
+    "heroku"
+  ],
+  "author": "Andrew Audibert, Donald Huang, Susan Wang",
+  "license": "MIT"
+}
