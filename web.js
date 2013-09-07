@@ -32,20 +32,20 @@ var Schema = mongoose.Schema,
 UserSchema = new Schema({
   name: String,
   access_token: Object,
-  feeds: [{ type: ObjectId, ref: 'FeedSchema' }],
-  subscriptions: [{ type: ObjectId, ref: 'FeedSchema' }]
+  feeds: [{ type: ObjectId, ref: 'Feed' }],
+  subscriptions: [{ type: ObjectId, ref: 'Feed' }]
 });
 FeedSchema = Schema({
   name: String, // name of feed
-  owner: { type: ObjectId, ref: 'UserSchema' }, // owner for feed
-  tasks: [{ type: ObjectId, ref: 'TaskSchema' }],
-  subscribers: [{ type: ObjectId, ref: 'UserSchema' }]
+  owner: { type: ObjectId, ref: 'User' }, // owner for feed
+  tasks: [{ type: ObjectId, ref: 'Task' }],
+  subscribers: [{ type: ObjectId, ref: 'User' }]
 });
 TaskSchema = Schema({
   name: String,
   notes: String,
   due_date: Date,
-  feed: { type : ObjectId, ref: 'FeedSchema' }
+  feed: { type : ObjectId, ref: 'Feed' }
 });
 
 var User = mongoose.model('User', UserSchema),
@@ -157,6 +157,16 @@ app.get('/feeds', function(request, response) {
   if (typeof user === 'undefined') {
     return response.send({success:false});
   }
+  User
+  .findOne({name: user.name})
+  .populate('feeds subscriptions')
+  .exec(function(error, user_info) {
+    response.send({
+      success: true,
+      feeds: user_info.feeds,
+      subscriptions: user_info.subscriptions
+    });
+  });
 });
 
 app.get('/callback', function(request, response) {
