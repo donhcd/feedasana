@@ -16,10 +16,23 @@ var express = require('express'),
     });
 
 app.use(express.logger());
+app.use(express.cookieParser());
+app.use(express.session({secret: process.env.BEST_SECRET_EVER}));
 
 app.get('/', function(request, response) {
-  // response.send('Hello World!');
-  response.redirect(authorization_uri);
+  var access_token = request.session.access_token;
+  if (typeof access_token !== 'undefined') {
+    asana.setResourceOwner(access_token);
+    asana.getUserMe(null, function(error, me) {
+      if (error) {
+        response.send('yo whattup homy we gots problem');
+      } else {
+        response.send('yo whattup homy' + me.data.name);
+      }
+    });
+  } else {
+    response.redirect(authorization_uri);
+  }
 });
 
 app.get('/callback', function(request, response) {
@@ -35,12 +48,10 @@ app.get('/callback', function(request, response) {
       console.log('Access Token Error', error.message);
       response.send('bad problem yo');
     } else {
-      token = OAuth2.AccessToken.create(result);
+      var token = OAuth2.AccessToken.create(result);
+      request.session.access_token = token;
       console.log('token is', token);
-      asana.setBearerToken(token.token.access_token);
-      asana.getUserMe(null, function(error, me) {
-        response.send('yo whattup homy' + me.data.name);
-      });
+      response.redirect('/');
     }
   }
 });
