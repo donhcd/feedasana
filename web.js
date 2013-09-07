@@ -73,27 +73,31 @@ app.post('/feeds', function(request, response) {
   if (typeof user === 'undefined') {
     return response.send({success:false});
   }
-  var feed = new Feed({
-    name: request.body.name,
-    owner: user.id,
-    tasks : [],
-    subscribers : []
-  });
-  feed.save(function withSavedFeed(error, saved_feed) {
-    if (error) {
-      response.send({
-        success: false,
-        error: error
+  Feed.findOne({ name: request.body.name }, function(error, feed) {
+    if (feed === null) {
+      var feed = new Feed({
+        name: request.body.name,
+        owner: user.id,
+        tasks : [],
+        subscribers : []
       });
-    } else {
-      console.log(user);
-      User.update({_id: user._id}, {$push: {feeds: saved_feed.id}}, function(err, num_affected, raw_response) {
-        if (err) return res.send('error adding feed to user ' + err);
-        console.log('added feed to user');
-        response.send({
-          success: true,
-          feed: saved_feed
-        });
+      feed.save(function withSavedFeed(error, saved_feed) {
+        if (error) {
+          response.send({
+            success: false,
+            error: error
+          });
+        } else {
+          console.log(user);
+          User.update({_id: user._id}, {$push: {feeds: saved_feed.id}}, function(err, num_affected, raw_response) {
+            if (err) return res.send('error adding feed to user ' + err);
+            console.log('added feed to user');
+            response.send({
+              success: true,
+              feed: saved_feed
+            });
+          });
+        }
       });
     }
   });
