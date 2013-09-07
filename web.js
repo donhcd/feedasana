@@ -18,8 +18,7 @@ var express = require('express'),
     }),
     authorization_uri = OAuth2.AuthCode.authorizeURL({
       redirect_uri: callback_uri
-    }),
-    index_str = fs.readFileSync(__dirname + '/views/index.html', 'utf8');
+    });
 
 app.use(express.logger());
 app.use(express.cookieParser());
@@ -60,7 +59,7 @@ mongoose.connect('mongodb://localhost/test');
 app.get('/', function(request, response) {
   var user = request.session.user;
   if (typeof user !== 'undefined') {
-    response.send(ejs.render(index_str, {penis:'hi'}));
+    response.send(ejs.render(fs.readFileSync(__dirname + '/views/index.html', 'utf8'), {penis:'hi'}));
   } else {
     // TODO: give middle page thingy
     response.redirect(authorization_uri);
