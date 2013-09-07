@@ -60,11 +60,9 @@
 }
 
 .task-hide-setup {
-  line-height:20px;
+  line-height:50px;
   opacity:1;
   padding:10px;
-  border:1px solid black;
-  background:white;
 }
 
 .task-hide-start.task-hide-start {

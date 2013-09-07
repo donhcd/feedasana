@@ -2,34 +2,47 @@
  * The angular controller for feedasana.
  */
 feedController = function($scope) {
-  $scope.allSubscriptions = [
-    {
-      owner: false,
-      name: "15-462: Graphics",
-      tasks: [
-        {name:"pool", due:"Oct 12, 2014"},
-        {name:"ray tracer", due:"Nov 23, 2014"},
-        {name:"shader", due:"Dec 02, 2014"}
-      ]
-    },
-    {
-      owner: false,
-      name: "15-466: Photography",
-      tasks: [
-        {name:"p1 and friends", due:"Oct 12, 2015"},
-        {name:"p2 yea...", due:"Nov 23, 2015"},
-        {name:"p5 killer", due:"Dec 02, 2018"}
-      ]
-    },
-    {
-      owner: true,
-      name: "Don's killer workout",
-      tasks: [
-        {name:"P90X", due:"May 12, 2015"},
-        {name:"50 push ups", due:"Dec 30, 2100"}
-      ]
-    }
-  ];
+  // Enum types.
+  $scope.feedStates = {NEW: "Create", SUBSCRIBE: "Subscribe"}
+  $scope.ownerType = {
+    SUBSCRIBER: 0,OWNER: 1, BOTH: 2
+  }
+
+  // Get all subscriptions.
+  $scope.allSubscriptions = {};
+  var retrieveAll = function() {
+    $.ajax('/feeds', {
+      type: 'get',
+    }).done(function(response) {
+      if (response.success) {
+        for (var i = 0; i < response.feeds.length; i++) {
+          $scope.allSubscriptions[response.feeds[i]._id] = {
+            ownerType : $scope.ownerType.OWNER,
+            _id: response.feeds[i]._id,
+            name: response.feeds[i].name,
+            tasks: response.feeds[i].tasks
+          }
+        }
+        for (var j = 0; j < response.subscriptions.length; j++) {
+          var value = $scope.allSubscriptions[response.subscriptions[j]._id];
+          if (value) {
+            value.ownerType = $scope.ownerType.BOTH;
+            continue;
+          }
+          $scope.allSubscriptions[response.subscriptions[j]._id] = {
+            ownerType : $scope.ownerType.SUBSCRIBER,
+            _id: response.feeds[j]._id,
+            name: response.subscriptions[j].name,
+            tasks: response.subscriptions[j].tasks
+          }
+        }
+      } else {
+        console.log("Error loading data.");
+      }
+      $scope.$apply();
+    });
+  };
+  retrieveAll();
 
   // New feed functionality.
   /**
@@ -39,7 +52,6 @@ feedController = function($scope) {
   $scope.newFeed = function() {
     $scope.curFeed = {name: ""};
   };
-  $scope.feedStates = {NEW: "Create", SUBSCRIBE: "Subscribe"}
   $scope.saveOrSubscribeFeed = function(state) {
     switch(state) {
       case ($scope.feedStates.NEW):
@@ -48,8 +60,8 @@ feedController = function($scope) {
           data: {
             name: $scope.curFeed.name
           }
-        }).done(function(saved_feed, success) {
-          console.log("saved: " + saved_feed);
+        }).done(function(saved_feed) {
+          retrieveAll();
         });
         break;
       case ($scope.feedStates.SUBSCRIBE):
@@ -58,8 +70,8 @@ feedController = function($scope) {
           data: {
             name: $scope.curFeed.name
           }
-        }).done(function(saved_feed, success) {
-          console.log("subscribed: " + saved_feed);
+        }).done(function(subscribed_feed, success) {
+          retrieveAll();
         });
         break;
       default:
@@ -86,14 +98,13 @@ feedController = function($scope) {
     $.ajax('/unsubscribe', {
       type: 'post',
       data: {
-        feed: feed.name
+        name: feed.name
       }
     }).done(function(feed, success) {
-      console.log("unsubscribed from " + feed);
+      console.log(feed);
+      retrieveAll();
     });
   }
-
-
 
   $scope.addDropboxAttachment = function() {
     var dboptions = {
@@ -116,9 +127,11 @@ feedController = function($scope) {
       }
     }).done(function(saved_feed, success) {
       console.log(saved_feed);
+      retrieveAll();
     });
     window.console.log(name);
     window.console.log(duedate);
   };
 
 };
+

@@ -31,22 +31,25 @@
             style="display:none">
           <input class="edit-input" type="text" placeholder="Name of feed" ng-model="curFeed.name">
           <div class="buttons">
-            <button class="edit" ng-click="saveOrSubscribeFeed(state)">{{state}}</button>
+            <button class="edit" ng-click="saveOrSubscribeFeed(state);curFeed=undefined">{{state}}</button>
             <button class="cancel" ng-click="curFeed=undefined">Cancel</button>
           </div>
         </div>
         <!--End: form for adding new feed.-->
       </div>
-      <div class="feed-block" ng-repeat="feed in allSubscriptions">
+      <div class="feed-block" ng-repeat="(feed_id, feed) in allSubscriptions">
         <div class="feed-name">{{feed.name}}
-          <button ng-show="feed.owner && (!selectedFeed)"
-            ng-click="newTask(feed)">+</button>
-          <button ng-show="!feed.owner"
-            ng-click="unsubscribe(feed)">-</button>
+          <button ng-show="(feed.ownerType >= ownerType.OWNER) && (!selectedFeed || selectedFeed._id != feed_id)"
+            ng-click="newTask(feed)">
+            +
+          </button>
+          <button ng-click="unsubscribe(feed)" ng-show="(feed.ownerType+1) % 2">
+            -
+          </button>
         </div>
         <div class="feed-tasks">
           <!--Start: form for adding new task.-->
-          <div class="feed-task new-task" style="display:none" ng-show="selectedFeed==feed"
+          <div class="feed-task new-task" style="display:none" ng-show="selectedFeed._id==feed_id"
             ng-animate="{show: 'task-show', hide:'task-hide'}">
             <div class="input-section">
               <div class="label-new-task">New Task</div>
