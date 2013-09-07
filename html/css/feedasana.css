@@ -49,8 +49,7 @@ body {
   font-size: 14px;
 }
 
-/* Animation stuff. */
-.task-show-setup {
+.task-show-setup, .task-hide-setup {
   -webkit-transition:all linear 0.2s;
   -moz-transition:all linear 0.2s;
   -ms-transition:all linear 0.2s;
@@ -71,3 +70,16 @@ body {
   background:white;
 }
 
+.task-hide-setup {
+  line-height:20px;
+  opacity:1;
+  padding:10px;
+  border:1px solid black;
+  background:white;
+}
+
+.task-hide-start.task-hide-start {
+  line-height:0;
+  opacity:0;
+  padding:0 10px;
+}

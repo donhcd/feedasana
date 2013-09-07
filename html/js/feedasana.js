@@ -2,8 +2,6 @@
  * The angular controller for feedasana.
  */
 feedController = function($scope) {
-  $scope.name = "Welcome to feed asana";
-
   $scope.allSubscriptions = [
     {
       owner: false,
@@ -37,5 +35,10 @@ feedController = function($scope) {
 
   $scope.setCurFeed = function(feed) {
     $scope.curFeed = feed;
+  }
+
+  $scope.saveTask = function(name, duedate) {
+    window.console.log(name);
+    window.console.log(duedate);
   }
 }
