@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "express": "~3.3.4"
+    "express": "~3.3.4",
+    "asana_api": "git://github.com/rushis/asana-api"
   },
   "engines": {
     "node": "0.10.13",
