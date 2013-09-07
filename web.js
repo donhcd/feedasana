@@ -1,5 +1,6 @@
 var express = require('express'),
-    app = express();
+    app = express(),
+    asana = require('asana_api');
 app.use(express.logger());
 
 app.get('/', function(request, response) {
