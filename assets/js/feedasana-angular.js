@@ -82,6 +82,19 @@ feedController = function($scope) {
     $scope.curTask = {name:"", dueDate: "", attachments: undefined};
   };
 
+  $scope.unsubscribe = function(feed) {
+    $.ajax('/unsubscribe', {
+      type: 'post',
+      data: {
+        feed: feed.name
+      }
+    }).done(function(feed, success) {
+      console.log("unsubscribed from " + feed);
+    });
+  }
+
+
+
   $scope.addDropboxAttachment = function() {
     var dboptions = {
         success: function(files) {

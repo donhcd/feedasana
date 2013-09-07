@@ -41,7 +41,8 @@
         <div class="feed-name">{{feed.name}}
           <button ng-show="feed.owner && (!selectedFeed)"
             ng-click="newTask(feed)">+</button>
-          <button ng-show="!feed.owner">-</button>
+          <button ng-show="!feed.owner"
+            ng-click="unsubscribe(feed)">-</button>
         </div>
         <div class="feed-tasks">
           <!--Start: form for adding new task.-->
@@ -72,10 +73,10 @@
           <div class="feed-task" ng-repeat="task in feed.tasks">
             <span class="feed-task-name">
               {{task.name}}
-            </span> 
+            </span>
             <span class="feed-task-due">
               {{task.due}}
-            </span> 
+            </span>
           </div>
         </div>
       </div>

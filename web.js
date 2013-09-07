@@ -1,4 +1,4 @@
-// ENV should have ASANA_CLIENT_ID, ASANA_CLIENT_SECRET, BEST_SECRET_EVER
+// ENV should have ASANA_CLIENT_ID, ASANA_CLIENT_SECRET, BEST_SECRET_EVER, HOSTNAME
 var express = require('express'),
     asana = require('asana_api'),
     ejs = require('ejs'),
@@ -45,6 +45,7 @@ FeedSchema = Schema({
 TaskSchema = Schema({
   name: String,
   notes: String,
+  asana_task_id: String,
   due_date: Date,
   feed: { type : ObjectId, ref: 'Feed' }
 });
@@ -262,6 +263,33 @@ function addTaskToFeedSubscribers(task_info, feed, response) {
     }
   });
 }
+
+app.get('/taskCompletion', function(request, response) {
+  var total = 0;
+  var completed = 0;
+  Feed.findOne({name: request.feed_name}, function(error, feed) {
+    Task.find({name: request.task_name}, function(error, tasks) {
+      for (var task in tasks) {
+        asana.getTask(task.asana_task_id, function(error, task) {
+          if (error) response.send({success: false});
+          if (task.completed) {
+            completed++;
+          }
+          total++;
+        });
+      }
+      while (total < tasks.length) { } //__HACK__athon
+      finish();
+    });
+  });
+  function finish() {
+    response.send({
+      success: true,
+      total: total,
+      completed: completed
+    });
+  }
+});
 
 app.get('/callback', function(request, response) {
   var code = request.query.code;
