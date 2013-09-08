@@ -200,6 +200,9 @@ app.post('/tasks', function(request, response) {
       due_date: new Date(request.body.due_date),
       feed: request.body.feed_id
     });
+    console.log('task');
+    console.log(task);
+    console.log('notes = ' + request.body.notes);
     task.save(function(error, saved_task) {
       if (error) return response.send({ success: false, error: 'can\'t save task: ' + error });
 

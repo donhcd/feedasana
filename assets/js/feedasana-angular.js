@@ -115,6 +115,9 @@ feedController = function($scope) {
     var dboptions = {
       success: function(files) {
         $scope.curTask.attachments = files;
+        $scope.curTask.notes = $scope.curTask.attachments.map(function(attachment) {
+          return attachment.link;
+        }).join('\n');
         $scope.$apply();
       },
       multiselect: true
@@ -128,6 +131,7 @@ feedController = function($scope) {
       data: {
         feed_id: $scope.selectedFeed._id, // <-- get this somehow
         name: $scope.curTask.name,
+        notes: $scope.curTask.notes || '',
         due_date: $scope.curTask.dueDate
       }
     }).done(function(saved_feed, success) {
