@@ -12,7 +12,8 @@
     "asana_api": "git://github.com/donhcd/asana-api",
     "ejs": "~0.8.4",
     "mongodb": "*",
-    "mongoose": "*"
+    "mongoose": "*",
+    "async": "*"
   },
   "engines": {
     "node": "0.10.13",

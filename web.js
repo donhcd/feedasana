@@ -54,6 +54,8 @@ var User = mongoose.model('User', UserSchema),
     Feed = mongoose.model('Feed', FeedSchema),
     Task = mongoose.model('Task', TaskSchema);
 
+var async = require('async');
+
 /* Connect to database */
 mongoose.connect('mongodb://localhost/feedasana');
 
@@ -101,6 +103,25 @@ app.post('/feeds', function(request, response) {
       });
     }
   });
+});
+
+app.post('/endFeed', function(request, response) {
+  var user = request.session.user_info;
+  if (typeof user === 'undefined') {
+    return response.send({success:false});
+  }
+  Feed.findOne({ name: request.body.name }).populate("subscribers").execute(
+    function(error, feed) {
+      if (feed === null) {
+        return;
+      }
+      for (var user in feed.subscribers) {
+        var ind = user.subscriptions.indexOf(user._id);
+        user.splice(ind, 1);
+        user.save(null);
+      }
+      feed.remove(null);
+    });
 });
 
 function errF(error, response) {
@@ -183,7 +204,7 @@ app.post('/tasks', function(request, response) {
     task.save(function(error, saved_task) {
       if (error) return response.send({ success: false, error: 'can\'t save task: ' + error });
 
-      Feed.update({_id: feed._id}, {$push: {tasks: saved_task.id}}, function(error, num_affected, raw_response) {
+      Feed.update({_id: feed._id}, {$push: {tasks: saved_task.id}}, function(err, num_affected, raw_response) {
         if (err) return res.send('error adding feed to user ' + err);
         console.log('added feed to user');
         response.send({
@@ -196,6 +217,14 @@ app.post('/tasks', function(request, response) {
   asana.setResourceOwner(user.access_token);
 });
 
+function range(n) {
+  var list = [];
+  for (var i = 0; i < n; i++) {
+    list.push(i);
+  }
+  return list;
+}
+
 app.get('/feeds', function(request, response) {
   var user = request.session.user_info;
   if (typeof user === 'undefined') {
@@ -203,12 +232,25 @@ app.get('/feeds', function(request, response) {
   }
   User
   .findOne({name: user.name})
-  .populate('feeds subscriptions')
+  .populate('subscriptions feeds')
   .exec(function(error, user_info) {
-    response.send({
-      success: true,
-      feeds: user_info.feeds,
-      subscriptions: user_info.subscriptions
+    async.map(range(user_info.feeds.length), function(i, callback) {
+      var feed_info = user_info.feeds[i];
+      console.log("feed_info: " + feed_info);
+      Feed.findById(feed_info._id, function(error, feed) {
+        console.log("Feed: " + feed);
+        feed.populate('tasks', function(error, populated) {
+          callback(error, populated);
+        });
+      });
+    }, function finish(error, populatedFeeds) {
+      var resp = {
+        success: true,
+        feeds: populatedFeeds,
+        subscriptions: user_info.subscriptions
+      }
+      response.send(resp);
+      console.log("\n\nSENT RESPONSE: " + resp + "\n\n");
     });
   });
 });
