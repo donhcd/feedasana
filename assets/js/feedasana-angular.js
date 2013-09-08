@@ -130,6 +130,5 @@ feedController = function($scope) {
       retrieveAll();
     });
   };
-
 };
 

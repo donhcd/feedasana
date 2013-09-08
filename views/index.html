@@ -6,8 +6,10 @@
     <script src="js/angular.min.js"></script>
     <script src="js/app.js"></script>
     <script src="js/feedasana-angular.js"></script>
+    <script src="js/ui-bootstrap.js"></script>
     <script src="https://www.dropbox.com/static/api/1/dropins.js"
         id="dropboxjs" data-app-key="ax7alweaqjr3ynz"></script>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/feedasana.css">
     <link rel="stylesheet" href="css/feeds.css">
   </head>
@@ -39,13 +41,24 @@
       </div>
       <div class="feed-block" ng-repeat="(feed_id, feed) in allSubscriptions">
         <div class="feed-name">{{feed.name}}
-          <button ng-show="(feed.ownerType >= ownerType.OWNER) && (!selectedFeed || selectedFeed._id != feed_id)"
-            ng-click="newTask(feed)">
-            +
-          </button>
-          <button ng-click="unsubscribe(feed)" ng-show="(feed.ownerType+1) % 2">
-            -
-          </button>
+          <li class="dropdown">
+            <span class="dropdown-toggle">
+              More
+            </span>
+            <ul class="dropdown-menu">
+              <li>
+                <a class="add-task" ng-show="(feed.ownerType >= ownerType.OWNER)"
+                  ng-click="newTask(feed)">
+                  +task
+                </a>
+              </li>
+              <li>
+                <a class="unsubscribe-task" ng-click="unsubscribe(feed)" ng-show="(feed.ownerType+1) % 2">
+                  unsubscribe
+                </a>
+              </li>
+            </ul>
+          </li>
         </div>
         <div class="feed-tasks">
           <!--Start: form for adding new task.-->
@@ -58,8 +71,11 @@
                   ng-model="curTask.name" maxlength="50">
               <div class="date">
                 <span class="label-until">Until: </span>
-                <input class="datepicker" placeholder="09/04/2013"
-                    type="text" ng-model="curTask.dueDate" datepicker />
+                <input type="text" datepicker-popup="dd-MM-yyyy"
+                  ng-model="curTask.dueDate" open="opened"
+                  show-weeks="false"
+                  datepicker-options="{}"
+                  date-disabled="disabled(date, mode)"/>
               </div>
             </div>
             <div class="attachment-section">

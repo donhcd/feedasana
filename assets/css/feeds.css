@@ -72,6 +72,12 @@
 }
 
 /* New task style. */
+.feed-name .options {
+  float: right;
+  font-family: "ssp";
+  font-size: 14px;
+}
+
 .new-task .label-new-task,
 .new-task .label-until {
   font-size: 17px;
@@ -93,7 +99,7 @@
   float: right;
 }
 
-.new-task .datepicker {
+.date input {
   width: 100px;
 }
 
@@ -102,11 +108,13 @@
   padding-top: 20px;
 }
 
-.new-task .attachment-section a {
+.new-task .attachment-section a,
+a.unsubscribe-task, a.add-task {
   cursor: pointer;
 }
 
-.new-task .attachment-section a:hover {
+.new-task .attachment-section a:hover,
+a.unsubscribe-task:hover, a.add-task:hover {
   color: #156193;
   cursor: pointer;
   text-decoration: underline;

@@ -1,4 +1,4 @@
-var app = angular.module('feedasana', []);
+var app = angular.module('feedasana', ['ui.bootstrap']);
 
 app.directive('datepicker', function() {
   return {

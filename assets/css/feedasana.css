@@ -18,8 +18,8 @@ button {
   -ms-border-radius: 3px;
   -o-border-radius: 3px;
   border: 1px solid #114d97;
-  width: 50px;
-  height: 25px;
+  width: 60px;
+  height: 30px;
 }
 
 button:hover {
@@ -33,3 +33,9 @@ input {
   font-size: 16px;
 }
 
+.dropup, .dropdown {
+  float: right;
+  font-size: 12px;
+  list-style: none;
+  cursor: pointer;
+}
