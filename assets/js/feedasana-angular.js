@@ -68,6 +68,25 @@ feedController = function($scope) {
        }
     });
   };
+
+  $scope.deleteFeed = function(feed) {
+    $.ajax('/endFeed', {
+      type: 'post',
+      data: {name:feed.name}
+    }).done(function() {
+      retrieveAll();  
+    });
+  }
+
+  $scope.getRatio = function(feedName, taskName) {
+    $.get('/taskCompletion', {
+      feed_name: feedName,
+      task_name: taskName
+    }, function(response) {
+      console.log(response);
+    });
+  }
+
   $scope.saveOrSubscribeFeed = function(state) {
     switch(state) {
       case ($scope.feedStates.NEW):

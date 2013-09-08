@@ -109,7 +109,7 @@ app.post('/endFeed', function(request, response) {
   if (typeof user === 'undefined') {
     return response.send({success:false});
   }
-  Feed.findOne({ name: request.body.name }).populate("subscribers").execute(
+  Feed.findOne({ name: request.body.name }).populate("subscribers").exec(
     function(error, feed) {
       if (feed === null) {
         return;

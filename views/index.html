@@ -68,9 +68,16 @@
               <li>
                 <a class="add-task" ng-show="(feed.ownerType >= ownerType.OWNER)"
                   ng-click="newTask(feed)">
-                  +task
+                  Add task
                 </a>
               </li>
+              <li>
+                <a class="delete-feed" ng-show="(feed.ownerType >= ownerType.OWNER)"
+                  ng-click="deleteFeed(feed)">
+                  Delete feed
+                </a>
+              </li>
+
               <li>
                 <a class="unsubscribe-task" ng-click="unsubscribe(feed)" ng-show="(feed.ownerType+1) % 2">
                   unsubscribe
@@ -110,8 +117,11 @@
           </div>
           <!--End: form for adding new task.-->
           <div class="feed-task" ng-repeat="task in feed.tasks">
-            <span class="feed-task-name">
+            <div class="feed-task-name" ng-click="getRatio(feed.name, task.name)">
               {{task.name}}
+            </div>
+            <span>
+              <progress class="progress-success" percent="55"></progress>
             </span>
             <span class="feed-task-due">
               {{convertDate(task.due_date)}}

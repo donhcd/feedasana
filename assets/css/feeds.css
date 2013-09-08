@@ -27,6 +27,12 @@
   border-top: 1px solid #e5e5e5;
 }
 
+.feed-task-name {
+  max-width: 200px;
+  display: inline-block;
+  overflow: hidden;
+}
+
 .feed-task-due {
   float: right;
   font-family: "sspl";
@@ -110,7 +116,7 @@ a.unsubscribe-task, a.add-task {
 }
 
 .new-task .attachment-section a:hover,
-a.unsubscribe-task:hover, a.add-task:hover {
+.dropdown-toggle:hover {
   color: #156193;
   cursor: pointer;
   text-decoration: underline;
@@ -165,4 +171,13 @@ input.edit-input {
 .subscribe-only div {
   display: inline;
   font-size: 18px;
+}
+
+.progress {
+  width: 100px;
+  display: inline-block;
+  margin: 0px;
+  margin-left: 150px;
+  position: absolute;
+  left: 150px;
 }
