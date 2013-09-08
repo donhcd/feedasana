@@ -347,6 +347,30 @@ app.get('/taskCompletion', function(request, response) {
   }
 });
 
+app.get('/search', function(request, response) {
+  var patt = request.body.pattern;
+  var patt = patt || request.query.pattern;
+  if (patt === null || typeof patt === 'undefined') {
+    response.send({success: false});
+    return;
+  }
+  console.log("Pattern: " + patt);
+  var matches = [];
+  Feed.find({}, function(error, feeds) {
+    for (var i = 0; i < feeds.length; i++) {
+      try {
+        if (feeds[i].name.match(patt, chill) !== null) {
+          matches.push(feeds[i.name]);
+        }
+      } catch (e) {
+        response.send({success: false});
+      }
+    }
+    response.send({success: true, matches: matches});
+    function chill(error, e) { };
+  });
+});
+
 app.get('/callback', function(request, response) {
   var code = request.query.code;
   OAuth2.AuthCode.getToken({
