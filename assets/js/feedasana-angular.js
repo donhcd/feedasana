@@ -8,6 +8,11 @@ feedController = function($scope) {
     SUBSCRIBER: 0,OWNER: 1, BOTH: 2
   }
 
+  $scope.convertDate = function(date) {
+    var date = new Date(date);
+    return date.getDate() + '-' + date.getMonth() + '-' + date.getFullYear();
+  }
+
   // Get all subscriptions.
   $scope.allSubscriptions = {};
   var retrieveAll = function() {
