@@ -62,7 +62,6 @@ mongoose.connect('mongodb://localhost/feedasana');
 app.get('/', function(request, response) {
   var user = request.session.user_info;
   if (typeof user !== 'undefined') {
-    // mockAddToTask(request, response);
     response.send(ejs.render(fs.readFileSync(__dirname + '/views/index.html', 'utf8'), {}));
   } else {
     // TODO: give middle page thingy
@@ -75,9 +74,9 @@ app.post('/feeds', function(request, response) {
   if (typeof user === 'undefined') {
     return response.send({success:false});
   }
-  Feed.findOne({ name: request.body.name }, function(error, feed) {
-    if (feed === null) {
-      var feed = new Feed({
+  Feed.findOne({ name: request.body.name }, function(error, feed_info) {
+    if (feed_info === null) {
+      feed = new Feed({
         name: request.body.name,
         owner: user.id,
         tasks : [],
@@ -201,20 +200,19 @@ app.post('/tasks', function(request, response) {
       due_date: new Date(request.body.due_date),
       feed: request.body.feed_id
     });
+    console.log('task');
+    console.log(task);
+    console.log('notes = ' + request.body.notes);
     task.save(function(error, saved_task) {
       if (error) return response.send({ success: false, error: 'can\'t save task: ' + error });
 
       Feed.update({_id: feed._id}, {$push: {tasks: saved_task.id}}, function(err, num_affected, raw_response) {
         if (err) return res.send('error adding feed to user ' + err);
         console.log('added feed to user');
-        response.send({
-          success: true,
-          task: saved_task
-        });
+        addTaskToFeedSubscribers(saved_task, feed, response);
       });
     });
   });
-  asana.setResourceOwner(user.access_token);
 });
 
 function range(n) {
@@ -248,38 +246,12 @@ app.get('/feeds', function(request, response) {
         success: true,
         feeds: populatedFeeds,
         subscriptions: user_info.subscriptions
-      }
+      };
       response.send(resp);
       console.log("\n\nSENT RESPONSE: " + resp + "\n\n");
     });
   });
 });
-
-function mockAddToTask(request, response) {
-  Feed.create({
-    name: 'datffeddnam',
-    owner: request.session.user_info._id,
-    tasks: [],
-    subscribers: request.session.user_info._id
-  }, function(err, feed) {
-    if (err) return response.send('fuck everything');
-    var task = new Task({
-          name: 'taskname!!',
-          notes: 'this is totally a real task',
-          due_date: new Date(),
-          feed: feed._id
-        });
-    task.save(function(error, saved_task) {
-      if (error) return response.send({ success: false, error: 'can\'t save task: ' + error });
-
-      Feed.update({id: feed._id}, {$push: {tasks: saved_task.id}}, function(error, num_affected, update_response) {
-        if (error) return res.send('error adding update response to user ' + error);
-        console.log('update response '+feed._id);
-        addTaskToFeedSubscribers(saved_task, feed, response);
-      });
-    });
-  });
-}
 
 function addTaskToFeedSubscribers(task_info, feed, response) {
   Feed.findById(feed._id).populate('subscribers').exec(function(err, feed) {
@@ -326,18 +298,20 @@ app.get('/taskCompletion', function(request, response) {
   Feed.findOne({name: request.feed_name}, function(error, feed) {
     Task.find({name: request.task_name}, function(error, tasks) {
       for (var task in tasks) {
-        asana.getTask(task.asana_task_id, function(error, task) {
-          if (error) response.send({success: false});
-          if (task.completed) {
-            completed++;
-          }
-          total++;
-        });
+        asana.getTask(task.asana_task_id, withAsanaTask);
       }
       while (total < tasks.length) { } //__HACK__athon
       finish();
     });
   });
+
+  function withAsanaTask(error, task) {
+    if (error) response.send({success: false});
+    if (task.completed) {
+      completed++;
+    }
+    total++;
+  }
   function finish() {
     response.send({
       success: true,
@@ -390,7 +364,10 @@ app.get('/callback', function(request, response) {
           console.log(error);
           response.send('yo whattup homy we gots problem '+error);
         } else {
-          User.findOne({'access_token.token.data.id': me.data.id}, saveNewUser);
+          var asana_id_path = 'access_token.token.data.id',
+              query = {};
+          query[asana_id_path] = me.data.id;
+          User.findOne(query, saveNewUser);
         }
 
         function withSavedUser(error, saved_user) {
@@ -425,7 +402,13 @@ app.get('/callback', function(request, response) {
             user.save(withSavedUser);
           } else {
             console.log('User already exists');
-            withSavedUser(null, user_info);
+            User.findByIdAndUpdate(user_info.id, {
+              name: user_info.name,
+              access_token: access_token,
+              workspace: user_info.workspace,
+              feeds: user_info.feeds,
+              subscriptions: user_info.subscriptions
+            }, withSavedUser);
           }
         }
       });

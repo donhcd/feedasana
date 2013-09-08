@@ -62,33 +62,35 @@
         </div>
         <div class="feed-tasks">
           <!--Start: form for adding new task.-->
-          <div class="feed-task new-task" style="display:none" ng-show="selectedFeed._id==feed_id"
-            ng-animate="{show: 'task-show', hide:'task-hide'}">
-            <div class="input-section">
-              <div class="label-new-task">New Task</div>
-              <input class="name" type="text"
-                  placeholder="e.g. 8 hours of P90X"
-                  ng-model="curTask.name" maxlength="50">
-              <div class="date">
-                <span class="label-until">Until: </span>
-                <input type="text" datepicker-popup="dd-MM-yyyy"
-                  ng-model="curTask.dueDate" open="opened"
-                  show-weeks="false"
-                  datepicker-options="{}"
-                  date-disabled="disabled(date, mode)"/>
-              </div>
+          <form>
+            <div class="feed-task new-task" style="display:none" ng-show="selectedFeed._id==feed_id"
+                ng-animate="{show: 'task-show', hide:'task-hide'}">
+                <div class="input-section">
+                <div class="label-new-task">New Task</div>
+                <input class="name" type="text"
+                    placeholder="e.g. 8 hours of P90X"
+                    ng-model="curTask.name" maxlength="50">
+                <div class="date">
+                    <span class="label-until">Until: </span>
+                    <input type="text" datepicker-popup="MM-dd-yyyy"
+                    ng-model="curTask.dueDate" open="opened"
+                    show-weeks="false"
+                    datepicker-options="{}"
+                    date-disabled="disabled(date, mode)"/>
+                </div>
+                </div>
+                <div class="attachment-section">
+                <a type="dropbox-chooser" ng-click="addDropboxAttachment()"/>Select attachment</a>
+                <div class="dropbox-links" ng-repeat="attachment in curTask.attachments">
+                    {{attachment.link}}
+                </div>
+                </div>
+                <div class="button-section">
+                <button ng-click="saveTask();newTask()">Save</button>
+                <button ng-click="newTask()">Cancel</button>
+                </div>
             </div>
-            <div class="attachment-section">
-              <a type="dropbox-chooser" ng-click="addDropboxAttachment()"/>Select attachment</a>
-              <div class="dropbox-links" ng-repeat="attachment in curTask.attachments">
-                {{attachment.link}}
-              </div>
-            </div>
-            <div class="button-section">
-              <button ng-click="saveTask()">Save</button>
-              <button ng-click="newTask()">Cancel</button>
-            </div>
-          </div>
+          </form>
           <!--End: form for adding new task.-->
           <div class="feed-task" ng-repeat="task in feed.tasks">
             <span class="feed-task-name">
