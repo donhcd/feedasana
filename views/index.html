@@ -41,7 +41,7 @@
               <span class="add-label">Add tasks in: </span>
               <div class="dropdown">
                 <span class="dropdown-toggle">
-                  {{curFeed.workspace.name || 'workspace'}}
+                  {{curFeed.workspace.name || 'project'}}
                 </span>
                 <ul class="dropdown-menu">
                   <li ng-repeat="ws in workspaces" ng-click="curFeed.workspace = ws">
