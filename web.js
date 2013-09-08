@@ -310,7 +310,7 @@ function addTaskToFeedSubscribers(task_info, feed, response) {
           name: task_info.name,
           notes: task_info.notes,
           assignee: 'me',
-          workspace: subscription_info.workspace.id,
+          workspace: (subscription_info.workspace && subscription_info.workspace.id) || subscriber.workspace.id,
           due_on: task_info.due_date
         };
         asana.setResourceOwner(subscriber.access_token);
@@ -365,7 +365,7 @@ app.get('/taskCompletion', function(request, response) {
 
 app.get('/search', function(request, response) {
   var patt = request.body.pattern;
-  var patt = patt || request.query.pattern;
+  patt = patt || request.query.pattern;
   if (patt === null || typeof patt === 'undefined') {
     response.send({success: false});
     return;
@@ -381,7 +381,7 @@ app.get('/search', function(request, response) {
       }
     }
     response.send({success: true, matches: matches});
-    function chill(error, e) { };
+    function chill(error, e) { }
   });
 });
 
