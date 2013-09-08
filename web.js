@@ -92,9 +92,8 @@ app.post('/feeds', function(request, response) {
             error: error
           });
         } else {
-          console.log(user);
-          User.update({_id: user._id}, {$push: {feeds: saved_feed.id}}, function(err, num_affected, raw_response) {
-            if (err) return res.send('error adding feed to user ' + err);
+          User.update({name: user.name}, {$push: {feeds: saved_feed._id}}, {upsert: true}, function(err, num_affected, raw_response) {
+            if (err) return response.send('error adding feed to user ' + err);
             console.log('added feed to user');
             response.send({
               success: true,
@@ -103,6 +102,8 @@ app.post('/feeds', function(request, response) {
           });
         }
       });
+    } else {
+      console.log("did find feed_info");
     }
   });
 });
@@ -246,9 +247,10 @@ app.get('/feeds', function(request, response) {
   .findOne({name: user.name})
   .populate('subscriptions feeds')
   .exec(function(error, user_info) {
+    console.log('number of feeds: '+user_info.feeds.length);
+    console.log('number of subscriptions: '+user_info.subscriptions.length);
     async.map(range(user_info.feeds.length), function(i, callback) {
       var feed_info = user_info.feeds[i];
-      console.log("feed_info: " + feed_info);
       Feed.findById(feed_info._id, function(error, feed) {
         console.log("Feed: " + feed);
         feed.populate('tasks', function(error, populated) {
@@ -260,7 +262,7 @@ app.get('/feeds', function(request, response) {
       async.map(range(user_info.subscriptions.length), function(i, callback) {
         var subscription_info = user_info.subscriptions[i];
         console.log("subscription_info: " + subscription_info);
-        Subscription.findById(feed_info.id, function(error, subscription) {
+        Subscription.findById(subscription_info.id, function(error, subscription) {
           console.log("Subscription: " + subscription);
           subscription.populate('feed', function(error, populated) {
             callback(error, populated);
@@ -278,7 +280,7 @@ app.get('/feeds', function(request, response) {
             success: true,
             feeds: populatedFeeds,
             subscriptions: subscriptionFeeds,
-            workspaces: data
+            workspaces: data.data
           });
           console.log("\n\nSENT RESPONSE: " + response + "\n\n");
         });
