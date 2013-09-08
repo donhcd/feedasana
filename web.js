@@ -34,13 +34,17 @@ UserSchema = new Schema({
   access_token: Object,
   workspace: Object,
   feeds: [{ type: ObjectId, ref: 'Feed' }],
-  subscriptions: [{ type: ObjectId, ref: 'Feed' }]
+  subscriptions: [{ type: ObjectId, ref: 'Subscription' }]
 });
 FeedSchema = Schema({
   name: String, // name of feed
   owner: { type: ObjectId, ref: 'User' }, // owner for feed
-  tasks: [{ type: ObjectId, ref: 'Task' }],
-  subscribers: [{ type: ObjectId, ref: 'User' }]
+  tasks: [{ type: ObjectId, ref: 'Task' }]
+});
+SubscriptionSchema = Schema({
+  feed: { type: ObjectId, ref: 'Feed' },
+  workspace: Object,
+  user: { type: ObjectId, ref: 'User' }
 });
 TaskSchema = Schema({
   name: String,
@@ -52,7 +56,8 @@ TaskSchema = Schema({
 
 var User = mongoose.model('User', UserSchema),
     Feed = mongoose.model('Feed', FeedSchema),
-    Task = mongoose.model('Task', TaskSchema);
+    Task = mongoose.model('Task', TaskSchema),
+    Subscription = mongoose.model('Subscription', SubscriptionSchema);
 
 var async = require('async');
 
@@ -76,13 +81,11 @@ app.post('/feeds', function(request, response) {
   }
   Feed.findOne({ name: request.body.name }, function(error, feed_info) {
     if (feed_info === null) {
-      feed = new Feed({
+      Feed.create({
         name: request.body.name,
-        owner: user.id,
-        tasks : [],
-        subscribers : []
-      });
-      feed.save(function withSavedFeed(error, saved_feed) {
+        owner: user._id,
+        tasks : []
+      }, function withSavedFeed(error, saved_feed) {
         if (error) {
           response.send({
             success: false,
@@ -104,6 +107,7 @@ app.post('/feeds', function(request, response) {
   });
 });
 
+/*
 app.post('/endFeed', function(request, response) {
   var user = request.session.user_info;
   if (typeof user === 'undefined') {
@@ -122,6 +126,7 @@ app.post('/endFeed', function(request, response) {
       feed.remove(null);
     });
 });
+*/
 
 function errF(error, response) {
   return response.send({success: false, error: error});
@@ -132,29 +137,40 @@ app.post('/subscriptions', function(request, response) {
   if (typeof user === 'undefined') {
     return response.send({success:false});
   }
+  // request.body.workspace = {
+  //   id: 234,
+  //   name: "asdfkj"
+  // };
   console.log(request.body);
   console.log(request.body.name);
+  console.log(request.body.workspace);
   Feed.findOne({ name: request.body.name }).exec(function(error, feed) {
-    if (error || feed === null || feed.subscribers.indexOf(user._id) !== -1)
+    if (error || feed === null)
       return response.send({success:false});
+    // TODO: check if this is already in user's subscriptions
     console.log('Feed: ' + feed);
     console.log('User ' + user);
-    Feed.update({_id: feed._id}, {$push: {subscribers: user._id}}, function(err, num, resp) {
-      if (err) return response.send('error subscribing user to feed: ' + err);
-      console.log('Feed ' + feed.name + ' got new subscriber ' + user.name);
+    console.log('User id ' + user._id);
+    Subscription.create({
+      feed: feed.id,
+      workspace: request.body.workspace,
+      user: user._id
+    }, function(error, subscription_info) {
+      if (error) return response.send('error creating subscription: ' + error);
+      User.findByIdAndUpdate(user._id, {$push: {subscriptions: subscription_info.id}}, function(err, num, resp) {
+        if (err) return response.send('error subscribing user to feed: ' + err);
+        console.log('User ' + user.name + ' subscribed to feed ' + request.body.name);
+        response.send({ success: true });
+      });
+      for (var task in Task.find({ feed: feed._id, due_date: { $lt: new Date().getDate() } })) {
+        User.update();
+        // TODO: add these to asana
+      }
     });
-    User.update({_id: user._id}, {$push: {subscriptions: feed._id}}, function(err, num, resp) {
-      if (err) return response.send('error subscribing user to feed: ' + err);
-      console.log('User ' + user.name + ' subscribed to feed ' + request.body.name);
-      response.send({ success: true });
-    });
-    for (var task in Task.find({ feed: feed._id, due_date: { $lt: new Date().getDate() } })) {
-      User.update();
-    }
   });
 });
 
-
+/*
 app.post('/unsubscribe', function(request, response) {
   var user = request.session.user_info;
   console.log(request.body.name);
@@ -179,34 +195,31 @@ app.post('/unsubscribe', function(request, response) {
     }
   });
 });
+*/
 
 app.post('/tasks', function(request, response) {
   var user = request.session.user_info;
   if (typeof user === 'undefined') {
     return response.send({success:false});
   }
-  Feed.findOne({ _id: request.body.feed_id }).populate('owner').exec(function(error, feed) {
+  Feed.findById(request.body.feed_id).populate('owner').exec(function(error, feed) {
     console.log('feed = ' + feed);
-    if (typeof feed === 'undefined' || feed.owner !== user.id) {
+    if (typeof feed === 'undefined' || feed.owner.id !== user._id) {
       return response.send({
         success: false,
         error: 'can\'t find this feed: ' + error
       });
     }
 
-    var task = new Task({
+    Task.create({
       name: request.body.name,
       notes: request.body.notes,
       due_date: new Date(request.body.due_date),
       feed: request.body.feed_id
-    });
-    console.log('task');
-    console.log(task);
-    console.log('notes = ' + request.body.notes);
-    task.save(function(error, saved_task) {
+    }, function(error, saved_task) {
       if (error) return response.send({ success: false, error: 'can\'t save task: ' + error });
 
-      Feed.update({_id: feed._id}, {$push: {tasks: saved_task.id}}, function(err, num_affected, raw_response) {
+      Feed.findByIdAndUpdate(feed.id, {$push: {tasks: saved_task.id}}, function(err, num_affected, raw_response) {
         if (err) return res.send('error adding feed to user ' + err);
         console.log('added feed to user');
         addTaskToFeedSubscribers(saved_task, feed, response);
@@ -228,6 +241,7 @@ app.get('/feeds', function(request, response) {
   if (typeof user === 'undefined') {
     return response.send({success:false});
   }
+  console.log('get /feeds');
   User
   .findOne({name: user.name})
   .populate('subscriptions feeds')
@@ -242,13 +256,33 @@ app.get('/feeds', function(request, response) {
         });
       });
     }, function finish(error, populatedFeeds) {
-      var resp = {
-        success: true,
-        feeds: populatedFeeds,
-        subscriptions: user_info.subscriptions
-      };
-      response.send(resp);
-      console.log("\n\nSENT RESPONSE: " + resp + "\n\n");
+      console.log('first finish');
+      async.map(range(user_info.subscriptions.length), function(i, callback) {
+        var subscription_info = user_info.subscriptions[i];
+        console.log("subscription_info: " + subscription_info);
+        Subscription.findById(feed_info.id, function(error, subscription) {
+          console.log("Subscription: " + subscription);
+          subscription.populate('feed', function(error, populated) {
+            callback(error, populated);
+          });
+        });
+      }, function finish(error, populatedSubscriptions) {
+        console.log('second finish');
+        var subscriptionFeeds = populatedSubscriptions.map(function(subscription) {
+          return subscription.feed;
+        });
+        asana.setResourceOwner(user.access_token);
+        asana.getProjects({}, function(err, data) {
+          if (err) return response.send('error getting projects: '+err);
+          response.send({
+            success: true,
+            feeds: populatedFeeds,
+            subscriptions: subscriptionFeeds,
+            workspaces: data
+          });
+          console.log("\n\nSENT RESPONSE: " + response + "\n\n");
+        });
+      });
     });
   });
 });
@@ -261,34 +295,42 @@ function addTaskToFeedSubscribers(task_info, feed, response) {
     console.log('in findOne, feed is: ');
     console.log(feed);
     console.log('in findOne, subscribers are: ');
-    console.log(feed.subscribers);
-    var errors = [];
-    feed.subscribers.forEach(function(subscriber) {
-      console.log('subscribing a subscriber ' + subscriber.name);
-      var task = {
-        name: task_info.name,
-        notes: task_info.notes,
-        assignee: 'me',
-        workspace: subscriber.workspace.id,
-        due_on: task_info.due_date
-      };
-      asana.setResourceOwner(subscriber.access_token);
-      asana.createTask(task, function(err, data) {
-        if (err) errors.push([subscriber.name, err]);
-        else {
-          console.log('subscriber subscribed:');
-          console.log(data);
-        }
+    Subscription.find({feed: feed.id}).populate('user').exec(function(error, subscriptions) {
+      if (error) response.send('error getting subscriptions: '+error);
+      console.log('subscriptions');
+      console.log(subscriptions);
+      var errors = [];
+      subscriptions.forEach(function(subscription_info) {
+        var subscriber = subscription_info.user;
+        console.log(subscription_info);
+        console.log(subscription_info.id);
+        console.log(subscription_info._id);
+        console.log('subscribing a subscriber ' + subscriber);
+        var task = {
+          name: task_info.name,
+          notes: task_info.notes,
+          assignee: 'me',
+          workspace: subscription_info.workspace.id,
+          due_on: task_info.due_date
+        };
+        asana.setResourceOwner(subscriber.access_token);
+        asana.createTask(task, function(err, data) {
+          if (err) errors.push([subscriber.name, err]);
+          else {
+            console.log('subscriber subscribed:');
+            console.log(data);
+          }
+        });
       });
+      if (errors.length > 0) {
+        response.send('errors occurred: ' + errors);
+      } else {
+        response.send({
+          success: true,
+          task: task_info
+        });
+      }
     });
-    if (errors.length > 0) {
-      response.send('errors occurred: ' + errors);
-    } else {
-      response.send({
-        success: true,
-        task: task_info
-      });
-    }
   });
 }
 
