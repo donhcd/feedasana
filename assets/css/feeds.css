@@ -12,10 +12,6 @@
   box-shadow: 0px 2px 4px rgba(0,0,0,0.2);
 }
 
-.feed-task {
-  padding: 10px;
-}
-
 .feed-name {
   font-family: "sspl";
   font-size: 27px;
@@ -27,6 +23,7 @@
 }
 
 .feed-task {
+  padding: 10px;
   border-top: 1px solid #e5e5e5;
 }
 

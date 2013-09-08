@@ -32,7 +32,11 @@
         <div ng-show="curFeed"
             style="display:none">
           <div class="entry-area">
-            <input class="edit-input" type="text" placeholder="Name of feed" ng-model="curFeed.name">
+            <input class="edit-input"
+            type="text"
+            placeholder="Name of feed"
+            typeahead="name for name in allFeeds | filter:$viewValue | limitTo:2"
+            ng-model="curFeed.name">
             <div class="subscribe-only" ng-show="state==feedStates.SUBSCRIBE">
               <span class="add-label">Add tasks in: </span>
               <div class="dropdown">

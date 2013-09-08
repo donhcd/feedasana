@@ -16,6 +16,7 @@ feedController = function($scope) {
   // Get all subscriptions.
   $scope.allSubscriptions = {};
   $scope.workspaces = [];
+  $scope.allFeeds = [];
 
   var retrieveAll = function() {
     $.ajax('/feeds', {
@@ -59,6 +60,13 @@ feedController = function($scope) {
   $scope.curFeed;
   $scope.newFeed = function() {
     $scope.curFeed = {name: "", workspace: {}};
+    $.get('/search', {
+      pattern: '8*'
+     }, function(response) {
+       if (response.success) {
+        $scope.allFeeds = response.matches;
+       }
+    });
   };
   $scope.saveOrSubscribeFeed = function(state) {
     switch(state) {

@@ -333,9 +333,7 @@ app.get('/search', function(request, response) {
   Feed.find({}, function(error, feeds) {
     for (var i = 0; i < feeds.length; i++) {
       try {
-        if (feeds[i].name.match(patt, chill) !== null) {
-          matches.push(feeds[i.name]);
-        }
+        matches.push(feeds[i].name);
       } catch (e) {
         response.send({success: false});
       }
