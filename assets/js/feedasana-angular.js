@@ -95,7 +95,6 @@ feedController = function($scope) {
       }
       $scope.$apply();
     });
-    console.log("stuff");
   }
 
   $scope.saveOrSubscribeFeed = function(state) {
@@ -143,7 +142,6 @@ feedController = function($scope) {
         name: feed.name
       }
     }).done(function(feed, success) {
-      console.log(feed);
       retrieveAll();
     });
   }
@@ -168,7 +166,6 @@ feedController = function($scope) {
         due_date: $scope.curTask.dueDate,
       }
     }).done(function(saved_feed, success) {
-      console.log(saved_feed);
       retrieveAll();
     });
   };
