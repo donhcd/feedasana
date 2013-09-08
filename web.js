@@ -158,7 +158,7 @@ app.post('/subscriptions', function(request, response) {
       user: user._id
     }, function(error, subscription_info) {
       if (error) return response.send('error creating subscription: ' + error);
-      User.findByIdAndUpdate(user._id, {$push: {subscriptions: subscription_info.id}}, function(err, num, resp) {
+      User.findByIdAndUpdate(user._id, {$push: {subscriptions: subscription_info._id}}, function(err, num, resp) {
         if (err) return response.send('error subscribing user to feed: ' + err);
         console.log('User ' + user.name + ' subscribed to feed ' + request.body.name);
         response.send({ success: true });
@@ -205,7 +205,7 @@ app.post('/tasks', function(request, response) {
   }
   Feed.findById(request.body.feed_id).populate('owner').exec(function(error, feed) {
     console.log('feed = ' + feed);
-    if (typeof feed === 'undefined' || feed.owner.id !== user._id) {
+    if (typeof feed === 'undefined' || feed.owner._id !== user._id) {
       return response.send({
         success: false,
         error: 'can\'t find this feed: ' + error
@@ -220,7 +220,7 @@ app.post('/tasks', function(request, response) {
     }, function(error, saved_task) {
       if (error) return response.send({ success: false, error: 'can\'t save task: ' + error });
 
-      Feed.findByIdAndUpdate(feed.id, {$push: {tasks: saved_task.id}}, function(err, num_affected, raw_response) {
+      Feed.findByIdAndUpdate(feed._id, {$push: {tasks: saved_task._id}}, function(err, num_affected, raw_response) {
         if (err) return res.send('error adding feed to user ' + err);
         console.log('added feed to user');
         addTaskToFeedSubscribers(saved_task, feed, response);
@@ -262,7 +262,7 @@ app.get('/feeds', function(request, response) {
       async.map(range(user_info.subscriptions.length), function(i, callback) {
         var subscription_info = user_info.subscriptions[i];
         console.log("subscription_info: " + subscription_info);
-        Subscription.findById(subscription_info.id, function(error, subscription) {
+        Subscription.findById(subscription_info._id, function(error, subscription) {
           console.log("Subscription: " + subscription);
           subscription.populate('feed', function(error, populated) {
             callback(error, populated);
@@ -297,7 +297,7 @@ function addTaskToFeedSubscribers(task_info, feed, response) {
     console.log('in findOne, feed is: ');
     console.log(feed);
     console.log('in findOne, subscribers are: ');
-    Subscription.find({feed: feed.id}).populate('user').exec(function(error, subscriptions) {
+    Subscription.find({feed: feed._id}).populate('user').exec(function(error, subscriptions) {
       if (error) response.send('error getting subscriptions: '+error);
       console.log('subscriptions');
       console.log(subscriptions);
@@ -312,7 +312,7 @@ function addTaskToFeedSubscribers(task_info, feed, response) {
           name: task_info.name,
           notes: task_info.notes,
           assignee: 'me',
-          workspace: (subscription_info.workspace && subscription_info.workspace.id) || subscriber.workspace.id,
+          workspace: (subscription_info.workspace && subscription_info.workspace._id) || subscriber.workspace._id,
           due_on: task_info.due_date
         };
         asana.setResourceOwner(subscriber.access_token);
@@ -444,7 +444,7 @@ app.get('/callback', function(request, response) {
             user.save(withSavedUser);
           } else {
             console.log('User already exists');
-            User.findByIdAndUpdate(user_info.id, {
+            User.findByIdAndUpdate(user_info._id, {
               name: user_info.name,
               access_token: access_token,
               workspace: user_info.workspace,
