@@ -3,30 +3,33 @@
  */
 feedController = function($scope) {
   // Enum types.
-  $scope.feedStates = {NEW: "Create", SUBSCRIBE: "Subscribe"};
+  $scope.feedStates = {NEW: "Create", SUBSCRIBE: "Subscribe"}
   $scope.ownerType = {
     SUBSCRIBER: 0,OWNER: 1, BOTH: 2
-  };
+  }
 
-  $scope.convertDate = function(date_info) {
-    var date = new Date(date_info);
+  $scope.convertDate = function(date) {
+    var date = new Date(date);
     return date.getMonth() + '-' + date.getDate() + '-' + date.getFullYear();
-  };
+  }
 
   // Get all subscriptions.
   $scope.allSubscriptions = {};
+  $scope.workspaces = [];
+
   var retrieveAll = function() {
     $.ajax('/feeds', {
-      type: 'get'
+      type: 'get',
     }).done(function(response) {
       if (response.success) {
+        $scope.workspaces = response.workspaces;
         for (var i = 0; i < response.feeds.length; i++) {
           $scope.allSubscriptions[response.feeds[i]._id] = {
             ownerType : $scope.ownerType.OWNER,
             _id: response.feeds[i]._id,
             name: response.feeds[i].name,
             tasks: response.feeds[i].tasks
-          };
+          }
         }
         for (var j = 0; j < response.subscriptions.length; j++) {
           var value = $scope.allSubscriptions[response.subscriptions[j]._id];
@@ -39,7 +42,7 @@ feedController = function($scope) {
             _id: response.feeds[j]._id,
             name: response.subscriptions[j].name,
             tasks: response.subscriptions[j].tasks
-          };
+          }
         }
       } else {
         console.log("Error loading data.");
@@ -55,16 +58,14 @@ feedController = function($scope) {
    */
   $scope.curFeed;
   $scope.newFeed = function() {
-    $scope.curFeed = {name: ""};
+    $scope.curFeed = {name: "", workspace: {}};
   };
   $scope.saveOrSubscribeFeed = function(state) {
     switch(state) {
       case ($scope.feedStates.NEW):
         $.ajax('/feeds', {
           type: 'post',
-          data: {
-            name: $scope.curFeed.name
-          }
+          data: $scope.curFeed
         }).done(function(saved_feed) {
           retrieveAll();
         });
@@ -72,9 +73,7 @@ feedController = function($scope) {
       case ($scope.feedStates.SUBSCRIBE):
         $.ajax('/subscriptions', {
           type: 'post',
-          data: {
-            name: $scope.curFeed.name
-          }
+          data: $scope.curFeed
         }).done(function(subscribed_feed, success) {
           retrieveAll();
         });
@@ -82,7 +81,7 @@ feedController = function($scope) {
       default:
         break;
     }
-  };
+  }
 
   // New task functionality.
   /**
@@ -109,21 +108,18 @@ feedController = function($scope) {
       console.log(feed);
       retrieveAll();
     });
-  };
+  }
 
   $scope.addDropboxAttachment = function() {
     var dboptions = {
-      success: function(files) {
-        $scope.curTask.attachments = files;
-        $scope.curTask.notes = $scope.curTask.attachments.map(function(attachment) {
-          return attachment.link;
-        }).join('\n');
-        $scope.$apply();
-      },
-      multiselect: true
-    };
+        success: function(files) {
+                   $scope.curTask.attachments = files;
+                   $scope.$apply();
+        },
+        multiselect: true
+      }
     Dropbox.choose(dboptions);
-  };
+  }
 
   $scope.saveTask = function() {
     $.ajax('/tasks', {
@@ -131,8 +127,7 @@ feedController = function($scope) {
       data: {
         feed_id: $scope.selectedFeed._id, // <-- get this somehow
         name: $scope.curTask.name,
-        notes: $scope.curTask.notes || '',
-        due_date: $scope.curTask.dueDate
+        due_date: $scope.curTask.dueDate,
       }
     }).done(function(saved_feed, success) {
       console.log(saved_feed);

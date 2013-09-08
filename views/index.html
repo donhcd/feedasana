@@ -31,7 +31,22 @@
         <!--Start: form for adding new feed.-->
         <div ng-show="curFeed"
             style="display:none">
-          <input class="edit-input" type="text" placeholder="Name of feed" ng-model="curFeed.name">
+          <div class="entry-area">
+            <input class="edit-input" type="text" placeholder="Name of feed" ng-model="curFeed.name">
+            <div class="subscribe-only" ng-show="state==feedStates.SUBSCRIBE">
+              <span class="add-label">Add tasks in: </span>
+              <div class="dropdown">
+                <span class="dropdown-toggle">
+                  {{curFeed.workspace.name || 'workspace'}}
+                </span>
+                <ul class="dropdown-menu">
+                  <li ng-repeat="ws in workspaces" ng-click="curFeed.workspace = ws">
+                  <a>{{ws.name}}</a>
+                  </li>
+               </ul>
+              </div>
+            </div>
+          </div>
           <div class="buttons">
             <button class="edit" ng-click="saveOrSubscribeFeed(state);curFeed=undefined">{{state}}</button>
             <button class="cancel" ng-click="curFeed=undefined">Cancel</button>
@@ -62,35 +77,33 @@
         </div>
         <div class="feed-tasks">
           <!--Start: form for adding new task.-->
-          <form>
-            <div class="feed-task new-task" style="display:none" ng-show="selectedFeed._id==feed_id"
-                ng-animate="{show: 'task-show', hide:'task-hide'}">
-                <div class="input-section">
-                <div class="label-new-task">New Task</div>
-                <input class="name" type="text"
-                    placeholder="e.g. 8 hours of P90X"
-                    ng-model="curTask.name" maxlength="50">
-                <div class="date">
-                    <span class="label-until">Until: </span>
-                    <input type="text" datepicker-popup="MM-dd-yyyy"
-                    ng-model="curTask.dueDate" open="opened"
-                    show-weeks="false"
-                    datepicker-options="{}"
-                    date-disabled="disabled(date, mode)"/>
-                </div>
-                </div>
-                <div class="attachment-section">
-                <a type="dropbox-chooser" ng-click="addDropboxAttachment()"/>Select attachment</a>
-                <div class="dropbox-links" ng-repeat="attachment in curTask.attachments">
-                    {{attachment.link}}
-                </div>
-                </div>
-                <div class="button-section">
-                <button ng-click="saveTask();newTask()">Save</button>
-                <button ng-click="newTask()">Cancel</button>
-                </div>
+          <div class="feed-task new-task" style="display:none" ng-show="selectedFeed._id==feed_id"
+            ng-animate="{show: 'task-show', hide:'task-hide'}">
+            <div class="input-section">
+              <div class="label-new-task">New Task</div>
+              <input class="name" type="text"
+                  placeholder="e.g. 8 hours of P90X"
+                  ng-model="curTask.name" maxlength="50">
+              <div class="date">
+                <span class="label-until">Until: </span>
+                <input type="text" datepicker-popup="MM-dd-yyyy"
+                  ng-model="curTask.dueDate" open="opened"
+                  show-weeks="false"
+                  datepicker-options="{}"
+                  date-disabled="disabled(date, mode)"/>
+              </div>
             </div>
-          </form>
+            <div class="attachment-section">
+              <a type="dropbox-chooser" ng-click="addDropboxAttachment()"/>Select attachment</a>
+              <div class="dropbox-links" ng-repeat="attachment in curTask.attachments">
+                {{attachment.link}}
+              </div>
+            </div>
+            <div class="button-section">
+              <button ng-click="saveTask();newTask()">Save</button>
+              <button ng-click="newTask()">Cancel</button>
+            </div>
+          </div>
           <!--End: form for adding new task.-->
           <div class="feed-task" ng-repeat="task in feed.tasks">
             <span class="feed-task-name">
