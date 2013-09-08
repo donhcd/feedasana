@@ -3,21 +3,21 @@
  */
 feedController = function($scope) {
   // Enum types.
-  $scope.feedStates = {NEW: "Create", SUBSCRIBE: "Subscribe"}
+  $scope.feedStates = {NEW: "Create", SUBSCRIBE: "Subscribe"};
   $scope.ownerType = {
     SUBSCRIBER: 0,OWNER: 1, BOTH: 2
-  }
+  };
 
-  $scope.convertDate = function(date) {
-    var date = new Date(date);
+  $scope.convertDate = function(date_info) {
+    var date = new Date(date_info);
     return date.getMonth() + '-' + date.getDate() + '-' + date.getFullYear();
-  }
+  };
 
   // Get all subscriptions.
   $scope.allSubscriptions = {};
   var retrieveAll = function() {
     $.ajax('/feeds', {
-      type: 'get',
+      type: 'get'
     }).done(function(response) {
       if (response.success) {
         for (var i = 0; i < response.feeds.length; i++) {
@@ -26,7 +26,7 @@ feedController = function($scope) {
             _id: response.feeds[i]._id,
             name: response.feeds[i].name,
             tasks: response.feeds[i].tasks
-          }
+          };
         }
         for (var j = 0; j < response.subscriptions.length; j++) {
           var value = $scope.allSubscriptions[response.subscriptions[j]._id];
@@ -39,7 +39,7 @@ feedController = function($scope) {
             _id: response.feeds[j]._id,
             name: response.subscriptions[j].name,
             tasks: response.subscriptions[j].tasks
-          }
+          };
         }
       } else {
         console.log("Error loading data.");
@@ -82,7 +82,7 @@ feedController = function($scope) {
       default:
         break;
     }
-  }
+  };
 
   // New task functionality.
   /**
@@ -109,18 +109,18 @@ feedController = function($scope) {
       console.log(feed);
       retrieveAll();
     });
-  }
+  };
 
   $scope.addDropboxAttachment = function() {
     var dboptions = {
-        success: function(files) {
-                   $scope.curTask.attachments = files;
-                   $scope.$apply();
-        },
-        multiselect: true
-      }
+      success: function(files) {
+        $scope.curTask.attachments = files;
+        $scope.$apply();
+      },
+      multiselect: true
+    };
     Dropbox.choose(dboptions);
-  }
+  };
 
   $scope.saveTask = function() {
     $.ajax('/tasks', {
@@ -128,7 +128,7 @@ feedController = function($scope) {
       data: {
         feed_id: $scope.selectedFeed._id, // <-- get this somehow
         name: $scope.curTask.name,
-        due_date: $scope.curTask.dueDate,
+        due_date: $scope.curTask.dueDate
       }
     }).done(function(saved_feed, success) {
       console.log(saved_feed);
