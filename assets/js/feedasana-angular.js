@@ -10,7 +10,7 @@ feedController = function($scope) {
 
   $scope.convertDate = function(date) {
     var date = new Date(date);
-    return date.getDate() + '-' + date.getMonth() + '-' + date.getFullYear();
+    return date.getMonth() + '-' + date.getDate() + '-' + date.getFullYear();
   }
 
   // Get all subscriptions.

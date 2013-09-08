@@ -71,7 +71,7 @@
                   ng-model="curTask.name" maxlength="50">
               <div class="date">
                 <span class="label-until">Until: </span>
-                <input type="text" datepicker-popup="dd-MM-yyyy"
+                <input type="text" datepicker-popup="MM-dd-yyyy"
                   ng-model="curTask.dueDate" open="opened"
                   show-weeks="false"
                   datepicker-options="{}"
@@ -85,7 +85,7 @@
               </div>
             </div>
             <div class="button-section">
-              <button ng-click="saveTask()">Save</button>
+              <button ng-click="saveTask();newTask()">Save</button>
               <button ng-click="newTask()">Cancel</button>
             </div>
           </div>
