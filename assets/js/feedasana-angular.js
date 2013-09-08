@@ -51,6 +51,7 @@ feedController = function($scope) {
       $scope.$apply();
     });
   };
+
   retrieveAll();
 
   // New feed functionality.
@@ -78,13 +79,23 @@ feedController = function($scope) {
     });
   }
 
-  $scope.getRatio = function(feedName, taskName) {
+  $scope.allRatios = {};
+
+  $scope.getRatio = function(feed, task) {
     $.get('/taskCompletion', {
-      feed_name: feedName,
-      task_name: taskName
+      feed_name: feed.name,
+      task_name: task.name
     }, function(response) {
-      console.log(response);
+      var total = 100;
+      var completed = Math.random() * 100;
+      if (!total) {
+        $scope.allRatios[task._id] = 1;
+      } else {
+        $scope.allRatios[task._id] = completed / total * 100;
+      }
+      $scope.$apply();
     });
+    console.log("stuff");
   }
 
   $scope.saveOrSubscribeFeed = function(state) {
