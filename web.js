@@ -262,7 +262,7 @@ app.get('/feeds', function(request, response) {
       async.map(range(user_info.subscriptions.length), function(i, callback) {
         var subscription_info = user_info.subscriptions[i];
         console.log("subscription_info: " + subscription_info);
-        Subscription.findById(subscription_info.id, function(error, subscription) {
+        Subscription.findById(subscription_info._id, function(error, subscription) {
           console.log("Subscription: " + subscription);
           subscription.populate('feed', function(error, populated) {
             callback(error, populated);

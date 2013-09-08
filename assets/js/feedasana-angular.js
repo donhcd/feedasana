@@ -40,7 +40,7 @@ feedController = function($scope) {
           }
           $scope.allSubscriptions[response.subscriptions[j]._id] = {
             ownerType : $scope.ownerType.SUBSCRIBER,
-            _id: response.feeds[j]._id,
+            _id: response.subscriptions[j]._id,
             name: response.subscriptions[j].name,
             tasks: response.subscriptions[j].tasks
           }
@@ -75,7 +75,7 @@ feedController = function($scope) {
       type: 'post',
       data: {name:feed.name}
     }).done(function() {
-      retrieveAll();  
+      retrieveAll();
     });
   }
 
