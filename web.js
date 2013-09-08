@@ -153,7 +153,7 @@ app.post('/subscriptions', function(request, response) {
     console.log('User ' + user);
     console.log('User id ' + user._id);
     Subscription.create({
-      feed: feed.id,
+      feed: feed._id,
       workspace: request.body.workspace,
       user: user._id
     }, function(error, subscription_info) {
@@ -163,10 +163,10 @@ app.post('/subscriptions', function(request, response) {
         console.log('User ' + user.name + ' subscribed to feed ' + request.body.name);
         response.send({ success: true });
       });
-      for (var task in Task.find({ feed: feed._id, due_date: { $lt: new Date().getDate() } })) {
-        User.update();
-        // TODO: add these to asana
-      }
+      // for (var task in Task.find({ feed: feed._id, due_date: { $lt: new Date().getDate() } })) {
+      //   User.update();
+      //   // TODO: add these to asana
+      // }
     });
   });
 });
