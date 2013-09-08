@@ -337,7 +337,10 @@ app.get('/callback', function(request, response) {
           console.log(error);
           response.send('yo whattup homy we gots problem '+error);
         } else {
-          User.findOne({'access_token.token.data.id': me.data.id}, saveNewUser);
+          var asana_id_path = 'access_token.token.data.id',
+              query = {};
+          query[asana_id_path] = me.data.id;
+          User.findOne(query, saveNewUser);
         }
 
         function withSavedUser(error, saved_user) {
@@ -372,7 +375,13 @@ app.get('/callback', function(request, response) {
             user.save(withSavedUser);
           } else {
             console.log('User already exists');
-            withSavedUser(null, user_info);
+            User.findByIdAndUpdate(user_info.id, {
+              name: user_info.name,
+              access_token: access_token,
+              workspace: user_info.workspace,
+              feeds: user_info.feeds,
+              subscriptions: user_info.subscriptions
+            }, withSavedUser);
           }
         }
       });
