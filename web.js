@@ -207,12 +207,6 @@ app.post('/tasks', function(request, response) {
     return response.send({success:false});
   }
   Feed.findById(request.body.feed_id).populate('owner').exec(function(error, feed) {
-    console.log('feed = ' + feed);
-    console.log('user = ' + JSON.stringify(user, null, 4)+', type='+typeof user);
-    console.log('feed owner._id = ' + feed.owner._id+', type='+typeof feed.owner._id);
-    console.log('feed owner.id = ' + feed.owner.id+', type='+typeof feed.owner.id);
-    console.log('user.id = ' + user.id+', type='+typeof user.id);
-    console.log('user._id = ' + user._id+', type='+typeof user._id);
     if (typeof feed === 'undefined' || feed.owner.id !== user._id) {
       return response.send({
         success: false,
