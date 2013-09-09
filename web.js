@@ -92,7 +92,7 @@ app.post('/feeds', function(request, response) {
             error: error
           });
         } else {
-          User.update({name: user.name}, {$push: {feeds: saved_feed._id}}, {upsert: true}, function(err, num_affected, raw_response) {
+          User.update({_id: user._id}, {$push: {feeds: saved_feed.id}}, function(err, num_affected, raw_response) {
             if (err) return response.send('error adding feed to user ' + err);
             console.log('added feed to user');
             response.send({
@@ -154,7 +154,10 @@ app.post('/subscriptions', function(request, response) {
     console.log('User id ' + user._id);
     Subscription.create({
       feed: feed._id,
-      workspace: request.body.workspace,
+      workspace: {
+        id: request.body.workspace.id,
+        name: request.body.workspace.name
+      },
       user: user._id
     }, function(error, subscription_info) {
       if (error) return response.send('error creating subscription: ' + error);
@@ -205,7 +208,12 @@ app.post('/tasks', function(request, response) {
   }
   Feed.findById(request.body.feed_id).populate('owner').exec(function(error, feed) {
     console.log('feed = ' + feed);
-    if (typeof feed === 'undefined' || feed.owner._id !== user._id) {
+    console.log('user = ' + JSON.stringify(user, null, 4)+', type='+typeof user);
+    console.log('feed owner._id = ' + feed.owner._id+', type='+typeof feed.owner._id);
+    console.log('feed owner.id = ' + feed.owner.id+', type='+typeof feed.owner.id);
+    console.log('user.id = ' + user.id+', type='+typeof user.id);
+    console.log('user._id = ' + user._id+', type='+typeof user._id);
+    if (typeof feed === 'undefined' || feed.owner.id !== user._id) {
       return response.send({
         success: false,
         error: 'can\'t find this feed: ' + error
@@ -264,8 +272,12 @@ app.get('/feeds', function(request, response) {
         console.log("subscription_info: " + subscription_info);
         Subscription.findById(subscription_info._id, function(error, subscription) {
           console.log("Subscription: " + subscription);
-          subscription.populate('feed', function(error, populated) {
-            callback(error, populated);
+          subscription.populate('feed', function(error, populatedSubscription) {
+            if (error) return callback(error, populatedSubscription);
+            populatedSubscription.feed.populate('tasks', function(error, populatedFeed) {
+              populatedSubscription.feed = populatedFeed;
+              callback(error, populatedSubscription);
+            });
           });
         });
       }, function finish(error, populatedSubscriptions) {
