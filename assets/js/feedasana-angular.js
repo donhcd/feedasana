@@ -139,12 +139,12 @@ feedController = function($scope) {
     $.ajax('/unsubscribe', {
       type: 'post',
       data: {
-        name: feed.name
+        id: feed._id
       }
     }).done(function(feed, success) {
       retrieveAll();
     });
-  }
+  };
 
   $scope.addDropboxAttachment = function() {
     var dboptions = {

@@ -174,32 +174,25 @@ app.post('/subscriptions', function(request, response) {
   });
 });
 
-/*
 app.post('/unsubscribe', function(request, response) {
-  var user = request.session.user_info;
+  var user_info = request.session.user_info;
   console.log(request.body.name);
-  if (typeof user === 'undefined') {
+  if (typeof user_info === 'undefined') {
     return response.send({success: false});
   }
-  Feed.findOne({ name: request.body.name }).exec(function(error, feed) {
-    if (error || feed === null) return response.send({success:false});
-    var userInd = feed.subscribers.indexOf(user._id);
-    var feedInd = user.subscriptions.indexOf(feed._id);
-    if (userInd < feed.subscribers.length) {
-      feed.subscribers.splice(userInd, 1);
-      feed.save(null);
-      User.findById(user._id, function(error, user) {
-        console.log("no more sub");
-        user.subscriptions.splice(feedInd, 1);
-        user.save(null);
-        response.send({ success: true });
-      });
-    } else {
-      response.send({ success: false });
-    }
+  Subscription.findOne({feed: request.body.id, user: user_info._id}, function(error, subscription) {
+    if (error || subscription === null) return response.send({success:false, error: "can't find subscription: " +error });
+    var feedInd = user_info.subscriptions.indexOf(subscription);
+    User.findById(user_info._id, function(error, user) {
+      if (error || !user) response.send({ success: false, error: "can't find user: " +error });
+      console.log("no more sub for "+user.name);
+      user.subscriptions.splice(feedInd, 1);
+      user.save(null);
+      subscription.remove();
+      response.send({ success: true });
+    });
   });
 });
-*/
 
 app.post('/tasks', function(request, response) {
   var user = request.session.user_info;
@@ -296,7 +289,7 @@ app.get('/feeds', function(request, response) {
 });
 
 function addTaskToFeedSubscribers(task_info, feed, response) {
-  Feed.findById(feed._id).populate('subscribers').exec(function(err, feed) {
+  Feed.findById(feed._id, function(err, feed) {
     if (err || feed === null) {
       response.send('can\'t find feed error: ' + err);
     }
