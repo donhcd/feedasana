@@ -7,7 +7,7 @@ var express = require('express'),
     app = express(),
     mongoose = require('mongoose'),
     port = process.env.PORT || 8089,
-    hostname = process.env.HOSTNAME + ':' + port,
+    hostname = process.env.HOSTNAME + (process.env.PORT ? '' : ':' + port),
     callback_uri = hostname + '/callback',
     OAuth2 = require('simple-oauth2')({
       clientID: process.env.ASANA_CLIENT_ID,
@@ -62,7 +62,7 @@ var User = mongoose.model('User', UserSchema),
 var async = require('async');
 
 /* Connect to database */
-mongoose.connect('mongodb://localhost/feedasana');
+mongoose.connect(process.env.MONGOHQ_URL);
 
 app.get('/', function(request, response) {
   var user = request.session.user_info;
