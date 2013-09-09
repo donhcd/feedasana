@@ -108,26 +108,23 @@ app.post('/feeds', function(request, response) {
   });
 });
 
-/*
-app.post('/endFeed', function(request, response) {
-  var user = request.session.user_info;
-  if (typeof user === 'undefined') {
+app.del('/feeds', function(request, response) {
+  var user_info = request.session.user_info;
+  if (typeof user_info === 'undefined') {
     return response.send({success:false});
   }
-  Feed.findOne({ name: request.body.name }).populate("subscribers").exec(
-    function(error, feed) {
-      if (feed === null) {
-        return;
-      }
-      for (var user in feed.subscribers) {
-        var ind = user.subscriptions.indexOf(user._id);
-        user.splice(ind, 1);
-        user.save(null);
-      }
-      feed.remove(null);
+  Feed.findById(request.body.id).populate('tasks owner').exec(function(error, feed) {
+    if (error || feed === null || feed.owner.id !== user_info._id) return response.send({success:false, error: "can't find feeds: " +error });
+    var ind = feed.owner.feeds.indexOf(feed._id);
+    feed.owner.feeds.splice(ind, 1);
+    feed.owner.save(null);
+    feed.tasks.forEach(function(task) {
+      task.remove(null);
     });
+    feed.remove(null);
+    response.send({success: true});
+  });
 });
-*/
 
 function errF(error, response) {
   return response.send({success: false, error: error});
