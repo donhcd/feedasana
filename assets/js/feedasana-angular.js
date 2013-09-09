@@ -23,6 +23,9 @@ feedController = function($scope) {
       type: 'get'
     }).done(function(response) {
       if (response.success) {
+        $scope.allSubscriptions = {};
+        $scope.workspaces = [];
+        $scope.allFeeds = [];
         $scope.workspaces = response.workspaces;
         for (var i = 0; i < response.feeds.length; i++) {
           $scope.allSubscriptions[response.feeds[i]._id] = {
