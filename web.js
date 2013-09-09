@@ -405,6 +405,7 @@ app.get('/callback', function(request, response) {
           var asana_id_path = 'access_token.token.data.id',
               query = {};
           query[asana_id_path] = me.data.id;
+          console.log('looking for user...');
           User.findOne(query, saveNewUser);
         }
 
